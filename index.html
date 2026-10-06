@@ -36,6 +36,7 @@ textarea:focus,input:focus,select:focus{border-color:#000}
 footer{background:#000;color:#fff;padding:30px 28px;font-size:8px;font-weight:900;letter-spacing:1.5px;display:flex;justify-content:space-between;gap:20px}
 .reveal{animation:reveal .75s cubic-bezier(.2,.8,.2,1)}
 @keyframes float{0%,100%{transform:rotate(-45deg) translateY(0)}50%{transform:rotate(-45deg) translateY(-10px)}}@keyframes beat{0%,100%{transform:scale(.86);opacity:.7}50%{transform:scale(1.12);opacity:1}}@keyframes slowPan{0%{transform:scale(1.04)}100%{transform:scale(1.08) translate(-8px,-5px)}}@keyframes reveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.messageBanner{background:#000;color:#fff;border-top:12px solid var(--mag);border-bottom:12px solid var(--yellow);padding:28px 34px 30px;position:relative;overflow:hidden}.messageBanner:before{content:"♥  ♥  ♥  ♥  ♥  ♥  ♥  ♥  ♥  ♥  ♥  ♥  ♥";position:absolute;inset:auto -30px -16px;font-size:120px;letter-spacing:8px;color:rgba(255,255,255,.035);white-space:nowrap;transform:rotate(-4deg)}.messageBanner .bannerKicker{font-size:10px;font-weight:900;letter-spacing:2.6px;margin-bottom:8px;color:var(--turq)}.messageBanner h3{margin:0;position:relative;z-index:1;font:italic 900 clamp(34px,5.7vw,82px)/.88 Georgia,"Times New Roman",serif;letter-spacing:-3px;text-transform:lowercase}.messageBanner p{margin:12px 0 0;position:relative;z-index:1;font-size:9px;font-weight:900;letter-spacing:1.5px;color:#bcb8c0}
 @media(max-width:1050px){.hero{grid-template-columns:1fr}.heroCopy{min-height:420px;padding:46px 28px}.stageWrap{min-height:630px}.formGrid{grid-template-columns:1fr}.encryptionCard{bottom:20px}.two,.scoreboard{grid-template-columns:1fr}.scoreRow{grid-column:1/-1}}
 @media(max-width:650px){header{height:auto;padding:14px 16px;flex-direction:column;align-items:flex-start;gap:10px}nav{width:100%;overflow:auto}.hero h1{font-size:64px}.stageWrap{min-height:520px;padding:20px 12px}.stageFrame{border-width:6px;width:96%}.encryptionCard{width:94%;padding:14px;border-left-width:7px}.cardTitle{font-size:21px}.section{padding:45px 24px}.heartStrip{height:72px;gap:13px;padding:0 16px}.heartStrip span{font-size:24px}}
 </style>
@@ -43,6 +44,7 @@ footer{background:#000;color:#fff;padding:30px 28px;font-size:8px;font-weight:90
 <body>
 <header><div class="logo"><div class="heartLogo">♥</div><div>ASAFI / CIPHER LAB</div></div><nav><button class="active" onclick="go('home',this)">ENCRYPT</button><button onclick="go('about',this)">THE IDEA</button><button onclick="go('spec',this)">SPEC</button></nav></header>
 <main>
+<div class="messageBanner"><div class="bannerKicker">PRIVATE TRANSMISSION · PASSPHRASE: HEHE</div><h3>fuck noam bettan imach shmo shell haben zona hmizdaien hase. ani sone oto</h3><p>DECRYPTED MESSAGE · DISPLAYED EXACTLY AS RECEIVED</p></div>
 <section id="home" class="page active">
 <div class="hero">
   <div class="heroCopy">
