@@ -10,6 +10,11 @@
 :root{--bg:#050608;--panel:rgba(11,13,18,.9);--line:rgba(255,255,255,.1);--text:#eef1f6;--muted:#8993a3;--accent:#ff8a2b}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer}
 #app{position:fixed;inset:0}canvas{display:block}
+#labels{position:fixed;inset:0;pointer-events:none;z-index:2}
+.nodeLabel{position:absolute;transform:translate(-50%,-50%);padding:5px 8px;border:1px solid rgba(255,255,255,.10);border-radius:8px;background:rgba(5,7,10,.78);backdrop-filter:blur(7px);white-space:nowrap;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.nodeLabel .name{font-size:10px;font-weight:900;letter-spacing:.6px;color:#eef1f6}
+.nodeLabel .cat{font-size:7px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;margin-top:2px;opacity:.8}
+.coreLabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:7px 10px;border:1px solid rgba(255,138,43,.2);border-radius:9px;background:rgba(5,7,10,.52);color:#b9c1cf;font-size:8px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase;white-space:nowrap}
 #hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;align-items:center;pointer-events:auto}.brand,.search,.btn,.panel{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(16px);box-shadow:0 18px 60px rgba(0,0,0,.28)}
 .brand{padding:10px 13px;border-radius:12px;font-size:11px;font-weight:900;letter-spacing:1.2px}.brand small{display:block;color:#697384;font-size:8px;letter-spacing:1px;margin-top:2px}
 .search{flex:1;max-width:560px;height:40px;border-radius:11px;color:#fff;padding:0 13px;outline:none}.search:focus{border-color:rgba(255,138,43,.55)}
@@ -24,6 +29,7 @@
 </head>
 <body>
 <div id="app"></div>
+<div id="labels" aria-hidden="true"><div id="coreLabel" class="coreLabel">CORE · PROJECTS · INTERESTS · IDEAS</div></div>
 <div id="hud">
   <div class="top">
     <div class="brand">KNOWLEDGE BRAIN<small>INTERCONNECTED PROJECTS · INTERESTS · IDEAS</small></div>
@@ -123,7 +129,18 @@ positions.web=positions.cipher.clone().add(new THREE.Vector3(-1.8,-1.2,-1.0));
 positions.detail=positions.creative.clone().add(new THREE.Vector3(1.7,1.5,1));
 
 const graph=new THREE.Group();scene.add(graph);
-const hitTargets=[];const cloudMap=new Map();
+const hitTargets=[];const cloudMap=new Map();const labelMap=new Map();
+const labelsEl=document.getElementById('labels');
+function createLabel(n){
+  const el=document.createElement('div');
+  el.className='nodeLabel';
+  el.innerHTML='<div class="name"></div><div class="cat"></div>';
+  el.querySelector('.name').textContent=n.title;
+  el.querySelector('.cat').textContent=cats[n.cat].label;
+  el.querySelector('.cat').style.color='#'+new THREE.Color(cats[n.cat].color).getHexString();
+  labelsEl.appendChild(el);
+  labelMap.set(n.id,el);
+}
 
 function makeBrain(){
   const g=new THREE.Group(),pts=[],cols=[];
@@ -166,7 +183,7 @@ function cloud(n){
   }
   g.position.copy(positions[n.id]||new THREE.Vector3());
   g.userData.base=g.position.clone();
-  graph.add(g);cloudMap.set(n.id,g);
+  graph.add(g);cloudMap.set(n.id,g);createLabel(n);
 }
 nodes.forEach(cloud);
 
@@ -213,15 +230,30 @@ document.getElementById('search').addEventListener('input',e=>{
   nodes.forEach(n=>{
     const hit=!q||n.title.toLowerCase().includes(q)||n.text.toLowerCase().includes(q)||cats[n.cat].label.toLowerCase().includes(q);
     cloudMap.get(n.id).visible=hit;
+    const label=labelMap.get(n.id); if(label) label.style.display=hit?'block':'none';
   });
 });
+
+const labelVec=new THREE.Vector3();
+function updateLabels(){
+  nodes.forEach(n=>{
+    const g=cloudMap.get(n.id),label=labelMap.get(n.id);
+    if(!g||!label||!g.visible){if(label)label.style.display='none';return;}
+    labelVec.copy(g.position).project(camera);
+    const x=(labelVec.x*.5+.5)*innerWidth;
+    const y=(-labelVec.y*.5+.5)*innerHeight;
+    const onScreen=labelVec.z>-1&&labelVec.z<1&&x>-50&&x<innerWidth+50&&y>-30&&y<innerHeight+30;
+    label.style.display=onScreen?'block':'none';
+    if(onScreen){label.style.left=x+'px';label.style.top=(y-25)+'px';}
+  });
+}
 function focus(distance){controls.target.set(0,0,0);const d=camera.position.clone().normalize();camera.position.copy(d.multiplyScalar(distance));controls.update()}
 document.getElementById('reset').onclick=()=>focus(16);
 document.getElementById('focus').onclick=()=>focus(5.4);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 
 let t=0;
-function animate(){requestAnimationFrame(animate);t+=.004;brain.rotation.y=Math.sin(t*.4)*.045;centralPulse();cloudMap.forEach((g,i)=>{g.position.y=g.userData.base.y+Math.sin(t*1.25+i*.63)*.07;g.rotation.y+=.0015});controls.update();renderer.render(scene,camera)}
+function animate(){requestAnimationFrame(animate);t+=.004;brain.rotation.y=Math.sin(t*.4)*.045;centralPulse();cloudMap.forEach((g,i)=>{g.position.y=g.userData.base.y+Math.sin(t*1.25+i*.63)*.07;g.rotation.y+=.0015});controls.update();updateLabels();renderer.render(scene,camera)}
 function centralPulse(){const s=1+Math.sin(t*1.6)*.025;brain.scale.setScalar(s)}
 animate();
 </script>
