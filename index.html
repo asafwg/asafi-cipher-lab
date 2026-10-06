@@ -3,10 +3,252 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title></title>
+<meta name="description" content="ASAFI Cipher Lab — local browser encryption using AES-256-GCM.">
+<title>ASAFI Cipher Lab</title>
 <style>
-html,body{margin:0;width:100%;height:100%;background:#fff}
+:root{
+  --bg:#0b0c10;--panel:#11131a;--panel2:#171a23;--text:#f4f6f8;--muted:#9aa1ad;
+  --line:#292e39;--accent:#7c5cff;--accent2:#a995ff;--good:#49d39b;--bad:#ff667d;
+  --shadow:0 24px 70px rgba(0,0,0,.35)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 15% -10%,rgba(124,92,255,.18),transparent 32%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:auto;padding:0 22px}
+header{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(14px);background:rgba(11,12,16,.82);position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.7px}
+.mark{width:34px;height:34px;border:1px solid #3a4050;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#1b1e28,#0f1117)}
+.mark span{font-size:15px;color:var(--accent2)}
+.nav{display:flex;gap:6px}
+.nav button{background:transparent;border:0;color:var(--muted);padding:9px 11px;border-radius:8px;font-size:12px}
+.nav button:hover{background:#171a23;color:var(--text)}
+.hero{padding:78px 0 42px}
+.eyebrow{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:var(--accent2);font-weight:800}
+.hero h1{font-size:clamp(46px,7vw,84px);line-height:.95;letter-spacing:-4px;margin:14px 0 20px;max-width:860px}
+.hero p{max-width:680px;color:var(--muted);font-size:17px;margin:0}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.badge{border:1px solid var(--line);background:#10131a;border-radius:999px;padding:7px 11px;color:#c9ced7;font-size:11px}
+.card{background:linear-gradient(180deg,rgba(23,26,35,.96),rgba(16,18,25,.96));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.cardHead{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px}
+.cardTitle{font-size:14px;font-weight:800;letter-spacing:.3px}
+.local{font-size:10px;letter-spacing:1.3px;color:var(--good);font-weight:800}
+.tool{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.side{padding:22px}
+.side+.side{border-left:1px solid var(--line)}
+label{display:block;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#aab1bc;margin-bottom:8px}
+textarea,input,select{width:100%;color:var(--text);background:#0b0d12;border:1px solid #303644;border-radius:10px;outline:none}
+textarea{min-height:230px;resize:vertical;padding:14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+input,select{height:44px;padding:0 12px}
+textarea:focus,input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,255,.12)}
+.field{margin-bottom:16px}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.btn{border:1px solid #363c4a;background:#181b23;color:#eef0f4;border-radius:10px;padding:10px 14px;font-weight:800;font-size:11px;letter-spacing:.5px}
+.btn:hover{background:#20242e}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#6e4ff0}
+.btn.good{background:#15352b;border-color:#205640;color:#8ff0c8}
+.btn.small{padding:8px 11px;font-size:10px}
+.status{min-height:20px;margin-top:10px;font-size:11px;color:var(--muted)}
+.status.good{color:var(--good)}.status.bad{color:var(--bad)}
+.output{min-height:230px;background:#0b0d12;border:1px solid #303644;border-radius:10px;padding:14px;white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#dfe3eb}
+.output.empty{color:#5f6673}
+.metricGrid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.metric{padding:15px 18px;border-right:1px solid var(--line)}
+.metric:last-child{border-right:0}
+.metric b{display:block;font-size:11px;color:#8f97a5;margin-bottom:5px}.metric span{font-weight:800;font-size:12px}
+.section{padding:72px 0}.section h2{font-size:40px;letter-spacing:-2px;margin:10px 0 14px}.section p{color:var(--muted);max-width:760px}
+.infoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:25px}
+.info{padding:21px;border:1px solid var(--line);border-radius:14px;background:#10131a}
+.info h3{margin:0 0 7px;font-size:14px}.info p{margin:0;font-size:12px;line-height:1.6}
+footer{border-top:1px solid var(--line);padding:26px 0;color:#69717f;font-size:11px}
+.hidden{display:none}
+@media(max-width:900px){.tool{grid-template-columns:1fr}.side+.side{border-left:0;border-top:1px solid var(--line)}.metricGrid{grid-template-columns:1fr 1fr}.metric:nth-child(2){border-right:0}.infoGrid{grid-template-columns:1fr}}
+@media(max-width:600px){header{height:auto;padding:12px 0}.nav{display:none}.hero{padding-top:52px}.hero h1{letter-spacing:-2.7px}.side{padding:16px}.metricGrid{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)}.metric:last-child{border-bottom:0}.wrap{padding:0 15px}}
 </style>
 </head>
-<body></body>
+<body>
+<header>
+  <div class="wrap" style="width:100%;display:flex;align-items:center;justify-content:space-between">
+    <div class="brand"><div class="mark"><span>⌁</span></div><div>ASAFI CIPHER LAB</div></div>
+    <nav class="nav">
+      <button onclick="document.getElementById('cipher').scrollIntoView({behavior:'smooth'})">CIPHER</button>
+      <button onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">ABOUT</button>
+      <button onclick="document.getElementById('spec').scrollIntoView({behavior:'smooth'})">SPEC</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero wrap">
+  <div class="eyebrow">PRIVATE TEXT ENCRYPTION</div>
+  <h1>Encrypt it.<br>Keep the key.</h1>
+  <p>A practical browser-based encryption tool. Your plaintext, passphrase, salt and ciphertext are processed locally in your browser.</p>
+  <div class="badges">
+    <span class="badge">AES-256-GCM</span>
+    <span class="badge">PBKDF2 · SHA-256</span>
+    <span class="badge">Random salt + nonce</span>
+    <span class="badge">No server storage</span>
+  </div>
+</section>
+
+<section id="cipher" class="wrap">
+<div class="card">
+  <div class="cardHead"><div class="cardTitle">Cipher</div><div class="local">● LOCAL ONLY</div></div>
+  <div class="tool">
+    <div class="side">
+      <div class="field">
+        <label for="input">Message / ciphertext</label>
+        <textarea id="input" spellcheck="false" placeholder="Type plaintext to encrypt, or paste a ciphertext package to decrypt..."></textarea>
+      </div>
+      <div class="field">
+        <label for="pass">Passphrase</label>
+        <div class="row"><input id="pass" type="password" autocomplete="off" placeholder="Enter a passphrase"><button class="btn small" id="generate" type="button">GENERATE</button></div>
+      </div>
+      <div class="field">
+        <label for="format">Package format</label>
+        <select id="format"><option value="b64">Base64</option><option value="hex">Hex</option></select>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="encrypt" type="button">ENCRYPT</button>
+        <button class="btn" id="decrypt" type="button">DECRYPT</button>
+        <button class="btn" id="swap" type="button">USE OUTPUT AS INPUT</button>
+        <button class="btn" id="clear" type="button">CLEAR</button>
+      </div>
+      <div id="status" class="status">Ready.</div>
+    </div>
+    <div class="side">
+      <div class="field">
+        <label>Output</label>
+        <div id="output" class="output empty">Your result will appear here.</div>
+      </div>
+      <div class="controls">
+        <button class="btn good" id="copy" type="button">COPY OUTPUT</button>
+      </div>
+    </div>
+  </div>
+  <div class="metricGrid">
+    <div class="metric"><b>Encryption</b><span>AES-256-GCM</span></div>
+    <div class="metric"><b>Key derivation</b><span>PBKDF2 / SHA-256</span></div>
+    <div class="metric"><b>Iterations</b><span>310,000</span></div>
+    <div class="metric"><b>Random data</b><span>16B salt · 12B nonce</span></div>
+  </div>
+</div>
+</section>
+
+<section id="about" class="section wrap">
+  <div class="eyebrow">HOW IT WORKS</div>
+  <h2>Your browser does the cryptography.</h2>
+  <p>When you encrypt, the app creates a fresh random salt and AES-GCM nonce. Your passphrase is turned into a 256-bit encryption key with PBKDF2. The salt, nonce and authenticated ciphertext are packaged together so the same passphrase can decrypt it later.</p>
+  <div class="infoGrid">
+    <div class="info"><h3>1 — Derive</h3><p>PBKDF2-HMAC-SHA-256 derives an AES-256 key from your passphrase and a random 16-byte salt.</p></div>
+    <div class="info"><h3>2 — Encrypt</h3><p>AES-256-GCM encrypts the text and authenticates it, detecting changes to the ciphertext.</p></div>
+    <div class="info"><h3>3 — Package</h3><p>The salt, nonce and authenticated ciphertext are encoded as Base64 or Hex for easy copying.</p></div>
+  </div>
+</section>
+
+<section id="spec" class="section wrap">
+  <div class="eyebrow">SPECIFICATION</div>
+  <h2>Designed to be inspectable.</h2>
+  <div class="infoGrid">
+    <div class="info"><h3>AES-GCM</h3><p>256-bit key with a 12-byte nonce and the browser's authenticated-encryption implementation.</p></div>
+    <div class="info"><h3>PBKDF2</h3><p>HMAC-SHA-256 with 310,000 iterations and a 16-byte random salt.</p></div>
+    <div class="info"><h3>Storage</h3><p>No password, plaintext or ciphertext is sent to a backend by this page.</p></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">ASAFI CIPHER LAB · Runs locally in your browser.</div></footer>
+
+<script>
+const E=new TextEncoder(),D=new TextDecoder(),$=id=>document.getElementById(id);
+
+function setStatus(text,kind){
+  const s=$('status'); s.className='status'+(kind?' '+kind:''); s.textContent=text;
+}
+function bytesToB64(a){let s='';for(const x of a)s+=String.fromCharCode(x);return btoa(s)}
+function b64ToBytes(s){return Uint8Array.from(atob(s.trim()),c=>c.charCodeAt(0))}
+function bytesToHex(a){return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function hexToBytes(s){
+  s=s.trim();
+  if(!s || s.length%2 || !/^[0-9a-f]+$/i.test(s)) throw Error('Invalid hex package.');
+  const a=new Uint8Array(s.length/2);
+  for(let i=0;i<a.length;i++)a[i]=parseInt(s.slice(i*2,i*2+2),16);
+  return a;
+}
+async function deriveKey(pass,salt){
+  const base=await crypto.subtle.importKey('raw',E.encode(pass),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']
+  );
+}
+async function encryptText(text,pass){
+  if(!pass) throw Error('Enter a passphrase.');
+  if(!text) throw Error('Enter a message.');
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass,salt);
+  const ciphertext=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,E.encode(text)));
+  const pkg=new Uint8Array(28+ciphertext.length);
+  pkg.set(salt,0);pkg.set(iv,16);pkg.set(ciphertext,28);
+  return pkg;
+}
+async function decryptText(encoded,pass,format){
+  if(!pass) throw Error('Enter a passphrase.');
+  if(!encoded.trim()) throw Error('Paste a ciphertext package.');
+  const data=format==='hex'?hexToBytes(encoded):b64ToBytes(encoded);
+  if(data.length<29) throw Error('Invalid ciphertext package.');
+  const key=await deriveKey(pass,data.slice(0,16));
+  const plaintext=await crypto.subtle.decrypt(
+    {name:'AES-GCM',iv:data.slice(16,28)},key,data.slice(28)
+  );
+  return D.decode(plaintext);
+}
+function showOutput(value){
+  const o=$('output');o.textContent=value;o.classList.remove('empty');
+}
+function randomPassphrase(){
+  const words=['amber','blue','cedar','delta','ember','fjord','glacier','harbor','linen','maple','north','orbit','pebble','quartz','river','solar','violet','willow'];
+  const a=new Uint32Array(5);crypto.getRandomValues(a);
+  return a.map(x=>words[x%words.length]).join('-')+'-'+String(Math.floor(Math.random()*90)+10);
+}
+$('generate').onclick=()=>{$('pass').value=randomPassphrase();$('pass').type='text';setStatus('Generated a local passphrase.','good')};
+$('encrypt').onclick=async()=>{
+  try{
+    setStatus('Encrypting…');
+    const pkg=await encryptText($('input').value,$('pass').value);
+    showOutput($('format').value==='hex'?bytesToHex(pkg):bytesToB64(pkg));
+    setStatus('Encrypted and authenticated.','good');
+  }catch(e){setStatus(e.message,'bad')}
+};
+$('decrypt').onclick=async()=>{
+  try{
+    setStatus('Decrypting…');
+    const text=await decryptText($('input').value,$('pass').value,$('format').value);
+    showOutput(text);setStatus('Decrypted and authenticated.','good');
+  }catch(e){setStatus('Decryption failed: wrong passphrase or modified ciphertext.','bad')}
+};
+$('swap').onclick=()=>{const v=$('output').textContent;if(v&&!$('output').classList.contains('empty')){$('input').value=v;setStatus('Output moved to input.')}};
+$('clear').onclick=()=>{$('input').value='';$('pass').value='';showOutput('Your result will appear here.');$('output').classList.add('empty');setStatus('Ready.')};
+$('copy').onclick=async()=>{const v=$('output').textContent;if(!v||$('output').classList.contains('empty')){setStatus('Nothing to copy.','bad');return}try{await navigator.clipboard.writeText(v);setStatus('Output copied to clipboard.','good')}catch{setStatus('Clipboard access was blocked.','bad')}};
+
+(async()=>{
+  const tests=[
+    ['ASCII','ASAFI Cipher Lab'],
+    ['Unicode','שלום • Eurovision • 🔐']
+  ];
+  for(const [,plain] of tests){
+    const p=await encryptText(plain,'bench-passphrase');
+    const out=await decryptText(bytesToB64(p),'bench-passphrase','b64');
+    if(out!==plain) throw Error('Self-test failed');
+  }
+  const p=await encryptText('tamper-test','bench-passphrase');p[p.length-1]^=1;
+  let rejected=false;try{await decryptText(bytesToB64(p),'bench-passphrase','b64')}catch{rejected=true}
+  if(!rejected)throw Error('Authentication self-test failed');
+})();
+</script>
+</body>
 </html>
