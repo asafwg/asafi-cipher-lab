@@ -61,17 +61,8 @@
   <div id="privacy">Public-safe map · sensitive personal details intentionally excluded</div>
 </div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
-  }
-}
-</script>
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
-import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js';
-
+<script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"></script>
+<script>
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x050608);
 const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,200);
@@ -83,9 +74,46 @@ renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.getElementById('app').appendChild(renderer.domElement);
 
-const controls=new OrbitControls(camera,renderer.domElement);
-controls.enableDamping=true;controls.dampingFactor=.07;controls.minDistance=2.2;controls.maxDistance=40;
-controls.target.set(0,0,0);
+let orbitYaw=0.18,orbitPitch=1.45,orbitDistance=16,dragging=false,lastX=0,lastY=0;
+const controls={
+  target:new THREE.Vector3(0,0,0),
+  minDistance:1.4,
+  maxDistance:55,
+  update(){applyCamera();}
+};
+function applyCamera(){
+  orbitDistance=Math.max(controls.minDistance,Math.min(controls.maxDistance,orbitDistance));
+  orbitPitch=Math.max(0.18,Math.min(Math.PI-0.18,orbitPitch));
+  const s=Math.sin(orbitPitch);
+  camera.position.set(
+    controls.target.x + orbitDistance*s*Math.sin(orbitYaw),
+    controls.target.y + orbitDistance*Math.cos(orbitPitch),
+    controls.target.z + orbitDistance*s*Math.cos(orbitYaw)
+  );
+  camera.lookAt(controls.target);
+}
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(e.button!==0)return;
+  dragging=true;lastX=e.clientX;lastY=e.clientY;
+  renderer.domElement.setPointerCapture?.(e.pointerId);
+});
+renderer.domElement.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const dx=e.clientX-lastX,dy=e.clientY-lastY;
+  lastX=e.clientX;lastY=e.clientY;
+  orbitYaw-=dx*.006;orbitPitch-=dy*.006;applyCamera();
+});
+renderer.domElement.addEventListener('pointerup',e=>{
+  dragging=false;
+  renderer.domElement.releasePointerCapture?.(e.pointerId);
+});
+renderer.domElement.addEventListener('pointercancel',()=>{dragging=false;});
+renderer.domElement.addEventListener('wheel',e=>{
+  e.preventDefault();
+  orbitDistance*=Math.exp(e.deltaY*.0012);
+  applyCamera();
+},{passive:false});
+applyCamera();
 
 scene.add(new THREE.AmbientLight(0x7788aa,.55));
 const orange=new THREE.PointLight(0xff8a2b,14,30);orange.position.set(4,5,5);scene.add(orange);
@@ -369,7 +397,15 @@ function select(n){
     if(label) label.style.boxShadow=selected?'0 0 30px rgba(255,138,43,.16),0 12px 34px rgba(0,0,0,.34)':'0 12px 34px rgba(0,0,0,.30)';
   });
 }
+let pointerMoved=false,pointerStartX=0,pointerStartY=0;
 renderer.domElement.addEventListener('pointerdown',e=>{
+  pointerMoved=false;pointerStartX=e.clientX;pointerStartY=e.clientY;
+});
+renderer.domElement.addEventListener('pointermove',e=>{
+  if(Math.hypot(e.clientX-pointerStartX,e.clientY-pointerStartY)>5)pointerMoved=true;
+});
+renderer.domElement.addEventListener('click',e=>{
+  if(pointerMoved)return;
   const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(mouse,camera);const hits=ray.intersectObjects(hitTargets,false);
   if(hits[0]?.object.userData.node)select(hits[0].object.userData.node);
@@ -409,11 +445,18 @@ function updateLabels(){
     if(hit&&onScreen){label.style.left=x+'px';label.style.top=y+'px';}
   });
 }
-function focus(distance){controls.target.set(0,0,0);const d=camera.position.clone().normalize();camera.position.copy(d.multiplyScalar(distance));controls.update()}
+function focus(distance){controls.target.set(0,0,0);orbitDistance=distance;applyCamera()}
 document.getElementById('reset').onclick=()=>focus(16);
 document.getElementById('focus').onclick=()=>focus(5.4);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 
+if(!window.THREE){
+  document.getElementById('app').innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;background:#050608;color:#eef1f6;font:14px system-ui;padding:30px;text-align:center">Three.js could not load.<br><small style="color:#8993a3">Check the internet connection and refresh.</small></div>';
+  throw new Error('Three.js failed to load');
+}
+if(!renderer.capabilities?.isWebGL2 && !renderer.getContext()){
+  document.getElementById('app').innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;background:#050608;color:#eef1f6;font:14px system-ui;padding:30px;text-align:center">WebGL is unavailable in this browser.</div>';
+}
 let t=0;
 function animate(){requestAnimationFrame(animate);t+=.004;brain.rotation.y=Math.sin(t*.4)*.045;centralPulse();cloudMap.forEach((g,i)=>{g.position.y=g.userData.base.y+Math.sin(t*1.25+i*.63)*.07;g.rotation.y+=.0015});factMap.forEach((item,i)=>{const g=item.group;g.position.y=g.userData.base.y+Math.sin(t*.8+i*.37)*.11});controls.update();updateLabels();renderer.render(scene,camera)}
 function centralPulse(){const s=1+Math.sin(t*1.6)*.025;brain.scale.setScalar(s)}
