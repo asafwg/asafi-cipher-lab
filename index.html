@@ -14,6 +14,7 @@
 .nodeLabel{position:absolute;transform:translate(-50%,-50%);padding:5px 8px;border:1px solid rgba(255,255,255,.10);border-radius:8px;background:rgba(5,7,10,.78);backdrop-filter:blur(7px);white-space:nowrap;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.22)}
 .nodeLabel .name{font-size:10px;font-weight:900;letter-spacing:.6px;color:#eef1f6}
 .nodeLabel .cat{font-size:7px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;margin-top:2px;opacity:.8}
+.nodeLabel .desc{margin-top:4px;max-width:220px;white-space:normal;font-size:8px;line-height:1.25;color:#9fa8b7;opacity:.92}
 .coreLabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:7px 10px;border:1px solid rgba(255,138,43,.2);border-radius:9px;background:rgba(5,7,10,.52);color:#b9c1cf;font-size:8px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase;white-space:nowrap}
 #hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;align-items:center;pointer-events:auto}.brand,.search,.btn,.panel{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(16px);box-shadow:0 18px 60px rgba(0,0,0,.28)}
 .brand{padding:10px 13px;border-radius:12px;font-size:11px;font-weight:900;letter-spacing:1.2px}.brand small{display:block;color:#697384;font-size:8px;letter-spacing:1px;margin-top:2px}
@@ -134,9 +135,10 @@ const labelsEl=document.getElementById('labels');
 function createLabel(n){
   const el=document.createElement('div');
   el.className='nodeLabel';
-  el.innerHTML='<div class="name"></div><div class="cat"></div>';
+  el.innerHTML='<div class="name"></div><div class="cat"></div><div class="desc"></div>';
   el.querySelector('.name').textContent=n.title;
   el.querySelector('.cat').textContent=cats[n.cat].label;
+  el.querySelector('.desc').textContent=n.text;
   el.querySelector('.cat').style.color='#'+new THREE.Color(cats[n.cat].color).getHexString();
   labelsEl.appendChild(el);
   labelMap.set(n.id,el);
