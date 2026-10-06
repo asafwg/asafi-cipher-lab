@@ -3,464 +3,194 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Interactive 3D knowledge graph.">
 <meta name="robots" content="noindex,nofollow">
 <title>KNOWLEDGE BRAIN</title>
 <style>
-:root{--bg:#050608;--panel:rgba(11,13,18,.9);--line:rgba(255,255,255,.1);--text:#eef1f6;--muted:#8993a3;--accent:#ff8a2b}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer}
-#app{position:fixed;inset:0}canvas{display:block}
-#labels{position:fixed;inset:0;pointer-events:none;z-index:2}
-.nodeLabel{position:absolute;transform:translate(-50%,-50%);width:220px;padding:11px 12px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(6,8,12,.86);backdrop-filter:blur(12px);text-align:left;box-shadow:0 12px 34px rgba(0,0,0,.30)}
-.nodeLabel .name{font-size:13px;font-weight:950;letter-spacing:-.1px;color:#eef1f6}
-.nodeLabel .cat{font-size:7px;font-weight:850;letter-spacing:1.1px;text-transform:uppercase;margin-top:3px;opacity:.82}
-.nodeLabel .desc{margin-top:6px;max-width:196px;white-space:normal;font-size:9px;line-height:1.38;color:#aab3c1;opacity:.98}
-.nodeLabel .linksLine{margin-top:7px;padding-top:6px;border-top:1px solid rgba(255,255,255,.08);font-size:7px;line-height:1.3;color:#687386;letter-spacing:.35px}
-.factLabel{position:absolute;transform:translate(-50%,-50%);width:170px;padding:7px 8px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(5,7,10,.62);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.20);display:flex;gap:6px;align-items:flex-start}
-.factDot{width:6px;height:6px;min-width:6px;border-radius:50%;margin-top:3px;box-shadow:0 0 9px currentColor}
-.factText{font-size:8.5px;line-height:1.35;color:#aeb7c5;letter-spacing:.05px}
-.coreLabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:7px 10px;border:1px solid rgba(255,138,43,.2);border-radius:9px;background:rgba(5,7,10,.52);color:#b9c1cf;font-size:8px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase;white-space:nowrap}
-#hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;align-items:center;pointer-events:auto}.brand,.search,.btn,.panel{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(16px);box-shadow:0 18px 60px rgba(0,0,0,.28)}
-.brand{padding:10px 13px;border-radius:12px;font-size:11px;font-weight:900;letter-spacing:1.2px}.brand small{display:block;color:#697384;font-size:8px;letter-spacing:1px;margin-top:2px}
-.search{flex:1;max-width:560px;height:40px;border-radius:11px;color:#fff;padding:0 13px;outline:none}.search:focus{border-color:rgba(255,138,43,.55)}
-.right{margin-left:auto;display:flex;gap:6px}.btn{color:#c7ced8;border-radius:9px;padding:9px 11px;font-size:10px;font-weight:800}.btn:hover{background:rgba(24,27,34,.96);color:#fff}
-#legend{position:absolute;left:14px;bottom:14px;width:205px;padding:13px;border-radius:13px;pointer-events:auto}.title{font-size:9px;text-transform:uppercase;letter-spacing:1.7px;color:#7f899a;font-weight:900;margin-bottom:10px}.legendRow{display:flex;align-items:center;gap:8px;margin:7px 0;color:#bbc2cd;font-size:10px}.dot{width:8px;height:8px;border-radius:50%}
+:root{--bg:#030406;--panel:rgba(9,12,17,.86);--line:rgba(255,255,255,.11);--text:#eef1f6;--muted:#798494}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}
+#app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(circle at 50% 48%,#0b0e15 0,#030406 52%,#010203 100%)}
+#space{position:absolute;inset:0;perspective:900px;overflow:hidden}
+#lines,#particles{position:absolute;inset:0;width:100%;height:100%}
+#labels{position:absolute;inset:0;pointer-events:none}
+.clusterLabel{position:absolute;transform:translate(-50%,-50%);padding:11px 14px;width:190px;border:1px solid rgba(255,255,255,.14);border-radius:13px;background:rgba(5,7,11,.78);backdrop-filter:blur(10px);box-shadow:0 12px 30px rgba(0,0,0,.28);pointer-events:auto;text-align:left}
+.clusterLabel strong{display:block;font-size:13px;letter-spacing:-.2px}.clusterLabel .cat{font-size:7px;text-transform:uppercase;letter-spacing:1.2px;margin-top:3px;opacity:.78}.clusterLabel .count{font-size:7px;color:#687486;margin-top:6px}
+.factLabel{position:absolute;transform:translate(-50%,-50%);width:178px;padding:7px 9px;border:1px solid rgba(255,255,255,.075);border-radius:9px;background:rgba(5,7,11,.68);backdrop-filter:blur(8px);box-shadow:0 7px 20px rgba(0,0,0,.22);pointer-events:auto;cursor:pointer;line-height:1.32}
+.factLabel:hover{background:rgba(11,14,20,.9);border-color:rgba(255,255,255,.22);z-index:50}
+.factTop{display:flex;gap:6px;align-items:flex-start}.factDot{width:6px;height:6px;min-width:6px;border-radius:50%;margin-top:3px;box-shadow:0 0 10px currentColor}.factText{font-size:8.6px;color:#b5becb}.factMeta{font-size:6.5px;color:#697587;text-transform:uppercase;letter-spacing:.65px;margin-top:4px;margin-left:12px}
+#hud{position:absolute;inset:0;pointer-events:none}.top{position:absolute;left:14px;right:14px;top:14px;display:flex;gap:10px;align-items:center;pointer-events:auto;z-index:100}
+.brand,.search,.btn,.panel{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(16px);box-shadow:0 18px 60px rgba(0,0,0,.3)}
+.brand{padding:10px 13px;border-radius:12px;font-size:11px;font-weight:900;letter-spacing:1.2px}.brand small{display:block;color:#667183;font-size:8px;letter-spacing:1px;margin-top:2px}
+.search{flex:1;max-width:620px;height:40px;border-radius:11px;color:#fff;padding:0 13px;outline:none}.search::placeholder{color:#697486}.search:focus{border-color:rgba(255,138,43,.55)}
+.right{margin-left:auto;display:flex;gap:6px}.btn{color:#c7ced8;border-radius:9px;padding:9px 11px;font-size:10px;font-weight:800}.btn:hover{color:#fff;background:rgba(24,27,34,.96)}
+#legend{position:absolute;left:14px;bottom:14px;width:210px;padding:13px;border-radius:13px;pointer-events:auto;z-index:100}.title{font-size:9px;text-transform:uppercase;letter-spacing:1.7px;color:#7f899a;font-weight:900;margin-bottom:10px}.legendRow{display:flex;align-items:center;gap:8px;margin:7px 0;color:#bbc2cd;font-size:10px}.dot{width:8px;height:8px;border-radius:50%}
 .music{background:#ff5da2}.euro{background:#ffcf4a}.blender{background:#ff8a2b}.tech{background:#66a8ff}.future{background:#64dbac}.creative{background:#be8cff}.cipher{background:#fff}
-#info{position:absolute;right:14px;bottom:14px;width:min(370px,calc(100vw - 28px));padding:17px;border-radius:13px;display:none;pointer-events:auto}.show{display:block!important}.infoCat{font-size:9px;text-transform:uppercase;letter-spacing:1.7px;font-weight:900}.infoTitle{font-size:25px;letter-spacing:-1px;line-height:1.05;margin:7px 0}.infoText{font-size:12px;color:#a6afbc;line-height:1.6}.links{margin-top:13px;padding-top:11px;border-top:1px solid var(--line);font-size:9px;color:#6f7989}
-#hint{position:absolute;left:50%;top:50%;transform:translate(-50%,118px);font-size:9px;color:#667082;letter-spacing:1.1px;white-space:nowrap;text-transform:uppercase}
-#privacy{position:absolute;left:50%;bottom:15px;transform:translateX(-50%);font-size:8px;color:#4f5969;letter-spacing:1px;text-transform:uppercase;text-align:center;pointer-events:none}
-@media(max-width:700px){.top{left:8px;right:8px;top:8px;flex-wrap:wrap}.search{order:3;flex-basis:100%;max-width:none}.right{display:none}#legend{left:8px;bottom:8px;width:170px}#hint{transform:translate(-50%,105px);font-size:8px}#privacy{left:8px;right:8px;transform:none;bottom:7px}}
+#info{position:absolute;right:14px;bottom:14px;width:min(390px,calc(100vw - 28px));padding:17px;border-radius:13px;display:none;pointer-events:auto;z-index:100}.show{display:block!important}.infoCat{font-size:9px;text-transform:uppercase;letter-spacing:1.7px;font-weight:900}.infoTitle{font-size:25px;letter-spacing:-1px;line-height:1.05;margin:7px 0}.infoText{font-size:12px;color:#a6afbc;line-height:1.6}.links{margin-top:13px;padding-top:11px;border-top:1px solid var(--line);font-size:9px;color:#6f7989}
+#hint{position:absolute;left:50%;top:50%;transform:translate(-50%,118px);font-size:9px;color:#667082;letter-spacing:1.1px;white-space:nowrap;text-transform:uppercase;z-index:90;pointer-events:none}
+#privacy{position:absolute;left:50%;bottom:15px;transform:translateX(-50%);font-size:8px;color:#4f5969;letter-spacing:1px;text-transform:uppercase;text-align:center;pointer-events:none;z-index:100}
+@media(max-width:700px){.top{left:8px;right:8px;flex-wrap:wrap}.search{order:3;flex-basis:100%;max-width:none}.right{display:none}.clusterLabel{width:160px}.factLabel{width:150px}.factText{font-size:8px}#legend{left:8px;bottom:8px;width:175px}#hint{transform:translate(-50%,105px);font-size:8px}#privacy{left:8px;right:8px;transform:none;bottom:7px}}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div id="labels" aria-hidden="true"><div id="coreLabel" class="coreLabel">CORE · PROJECTS · INTERESTS · IDEAS</div></div>
-<div id="hud">
-  <div class="top">
-    <div class="brand">KNOWLEDGE BRAIN<small>INTERCONNECTED PROJECTS · INTERESTS · IDEAS</small></div>
-    <input id="search" class="search" placeholder="Search the brain…" autocomplete="off">
-    <div class="right"><button id="reset" class="btn">RESET</button><button id="focus" class="btn">FOCUS CORE</button></div>
+<div id="app">
+  <div id="space"><canvas id="particles"></canvas><canvas id="lines"></canvas><div id="labels"></div></div>
+  <div id="hud">
+    <div class="top">
+      <div class="brand">KNOWLEDGE BRAIN<small>SPECIFIC PROJECTS · DETAILS · IDEAS · WORKFLOWS</small></div>
+      <input id="search" class="search" placeholder="Search every detail…" autocomplete="off">
+      <div class="right"><button id="reset" class="btn">RESET</button><button id="focus" class="btn">FOCUS CORE</button></div>
+    </div>
+    <div id="legend" class="panel">
+      <div class="title">Clusters</div>
+      <div id="legendRows"></div>
+    </div>
+    <div id="info" class="panel">
+      <div id="infoCat" class="infoCat"></div><div id="infoTitle" class="infoTitle"></div><div id="infoText" class="infoText"></div><div id="links" class="links"></div>
+    </div>
+    <div id="hint">DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A CLOUD</div>
+    <div id="privacy">Public-safe map · sensitive personal details intentionally excluded</div>
   </div>
-  <div id="legend" class="panel">
-    <div class="title">Clusters</div>
-    <div class="legendRow"><span class="dot music"></span>Music</div>
-    <div class="legendRow"><span class="dot euro"></span>Eurovision</div>
-    <div class="legendRow"><span class="dot blender"></span>Blender & 3D</div>
-    <div class="legendRow"><span class="dot tech"></span>Technology</div>
-    <div class="legendRow"><span class="dot future"></span>Plans & learning</div>
-    <div class="legendRow"><span class="dot creative"></span>Creative making</div>
-    <div class="legendRow"><span class="dot cipher"></span>Coding & crypto</div>
-  </div>
-  <div id="info" class="panel">
-    <div id="infoCat" class="infoCat"></div>
-    <div id="infoTitle" class="infoTitle"></div>
-    <div id="infoText" class="infoText"></div>
-    <div id="links" class="links"></div>
-  </div>
-  <div id="hint">DRAG TO ORBIT · SCROLL TO ZOOM · CLICK A CLOUD FOR DETAILS</div>
-  <div id="privacy">Public-safe map · sensitive personal details intentionally excluded</div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.155.0/three.min.js"></script>
 <script>
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x050608);
-const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,200);
-camera.position.set(0,1.4,16);
-
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth,innerHeight);
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-document.getElementById('app').appendChild(renderer.domElement);
-
-let orbitYaw=0.18,orbitPitch=1.45,orbitDistance=16,dragging=false,lastX=0,lastY=0;
-const controls={
-  target:new THREE.Vector3(0,0,0),
-  minDistance:1.4,
-  maxDistance:55,
-  update(){applyCamera();}
-};
-function applyCamera(){
-  orbitDistance=Math.max(controls.minDistance,Math.min(controls.maxDistance,orbitDistance));
-  orbitPitch=Math.max(0.18,Math.min(Math.PI-0.18,orbitPitch));
-  const s=Math.sin(orbitPitch);
-  camera.position.set(
-    controls.target.x + orbitDistance*s*Math.sin(orbitYaw),
-    controls.target.y + orbitDistance*Math.cos(orbitPitch),
-    controls.target.z + orbitDistance*s*Math.cos(orbitYaw)
-  );
-  camera.lookAt(controls.target);
-}
-renderer.domElement.addEventListener('pointerdown',e=>{
-  if(e.button!==0)return;
-  dragging=true;lastX=e.clientX;lastY=e.clientY;
-  renderer.domElement.setPointerCapture?.(e.pointerId);
-});
-renderer.domElement.addEventListener('pointermove',e=>{
-  if(!dragging)return;
-  const dx=e.clientX-lastX,dy=e.clientY-lastY;
-  lastX=e.clientX;lastY=e.clientY;
-  orbitYaw-=dx*.006;orbitPitch-=dy*.006;applyCamera();
-});
-renderer.domElement.addEventListener('pointerup',e=>{
-  dragging=false;
-  renderer.domElement.releasePointerCapture?.(e.pointerId);
-});
-renderer.domElement.addEventListener('pointercancel',()=>{dragging=false;});
-renderer.domElement.addEventListener('wheel',e=>{
-  e.preventDefault();
-  orbitDistance*=Math.exp(e.deltaY*.0012);
-  applyCamera();
-},{passive:false});
-applyCamera();
-
-scene.add(new THREE.AmbientLight(0x7788aa,.55));
-const orange=new THREE.PointLight(0xff8a2b,14,30);orange.position.set(4,5,5);scene.add(orange);
-const blue=new THREE.PointLight(0x507fff,9,26);blue.position.set(-5,-2,4);scene.add(blue);
-
 const cats={
- music:{label:'Music',color:0xff5da2},
- euro:{label:'Eurovision',color:0xffcf4a},
- blender:{label:'Blender & 3D',color:0xff8a2b},
- tech:{label:'Technology',color:0x66a8ff},
- future:{label:'Plans & learning',color:0x64dbac},
- creative:{label:'Creative making',color:0xbe8cff},
- cipher:{label:'Coding & crypto',color:0xffffff}
+ music:{label:'Music',color:'#ff5da2'},euro:{label:'Eurovision',color:'#ffcf4a'},blender:{label:'Blender & 3D',color:'#ff8a2b'},tech:{label:'Technology',color:'#66a8ff'},future:{label:'Plans & learning',color:'#64dbac'},creative:{label:'Creative making',color:'#be8cff'},cipher:{label:'Coding & crypto',color:'#ffffff'}
 };
+const nodes=[{"id":"music","cat":"music","title":"Music","links":["eurovision","creative","future"]},{"id":"eurovision","cat":"euro","title":"Eurovision","links":["music","blender","creative"]},{"id":"blender","cat":"blender","title":"Blender & 3D","links":["eurovision","stage","dancer","tech"]},{"id":"stage","cat":"blender","title":"Stage design","links":["blender","eurovision","creative"]},{"id":"dancer","cat":"blender","title":"Character animation","links":["blender","creative"]},{"id":"tech","cat":"tech","title":"Technology","links":["blender","cipher","vr"]},{"id":"vr","cat":"tech","title":"VR / spatial","links":["tech","blender","creative"]},{"id":"creative","cat":"creative","title":"Creative making","links":["music","blender","tech"]},{"id":"future","cat":"future","title":"Plans & learning","links":["music","tech","blender","cipher"]},{"id":"cipher","cat":"cipher","title":"Coding & crypto","links":["crypto","tech","creative"]},{"id":"crypto","cat":"cipher","title":"Cryptography","links":["cipher","future","tech"]},{"id":"web","cat":"cipher","title":"Web building","links":["cipher","tech"]},{"id":"detail","cat":"creative","title":"Precision","links":["blender","stage","creative"]}];
+const facts=[{"id":"f0","cat":"music","text":"Songwriting starts from lyrics, ideas and emotional phrasing.","parent":"music"},{"id":"f1","cat":"music","text":"Five professionally produced songs have been made in Hebrew.","parent":"music"},{"id":"f2","cat":"music","text":"Music is treated as a long-term craft, not just a side hobby.","parent":"music"},{"id":"f3","cat":"music","text":"Spotify and Apple Music are part of the release plan.","parent":"music"},{"id":"f4","cat":"music","text":"Production decisions matter as much as the initial songwriting.","parent":"music"},{"id":"f5","cat":"music","text":"Performance ideas often influence the writing itself.","parent":"music"},{"id":"f6","cat":"music","text":"A song can trigger a whole visual concept, not just an audio track.","parent":"music"},{"id":"f7","cat":"music","text":"Stage movement and camera language are considered alongside music.","parent":"music"},{"id":"f8","cat":"music","text":"Eurovision is a major source of songwriting and production inspiration.","parent":"music"},{"id":"f9","cat":"music","text":"The goal is to turn rough ideas into finished, release-ready work.","parent":"music"},{"id":"f10","cat":"euro","text":"Eurovision is studied through songs, staging, graphics and production.","parent":"euro"},{"id":"f11","cat":"euro","text":"Stage design is interesting as much as the songs themselves.","parent":"euro"},{"id":"f12","cat":"euro","text":"2025 Basel visuals use a highly recognizable heart-based identity.","parent":"euro"},{"id":"f13","cat":"euro","text":"Florian Wieder's stage design is a recurring visual reference point.","parent":"euro"},{"id":"f14","cat":"euro","text":"Eurovision archives are used as a source of ideas and comparisons.","parent":"euro"},{"id":"f15","cat":"euro","text":"The 'Hall of Fame' concept turns Eurovision history into a physical experience.","parent":"euro"},{"id":"f16","cat":"euro","text":"Visual identity, typography and stage architecture are all connected.","parent":"euro"},{"id":"f17","cat":"euro","text":"Postcard and backstage camera ideas are treated like miniature films.","parent":"euro"},{"id":"f18","cat":"euro","text":"Audience POVs, performer POVs and production POVs all matter.","parent":"euro"},{"id":"f19","cat":"euro","text":"Greenroom spaces can become part of the storytelling.","parent":"euro"},{"id":"f20","cat":"euro","text":"A good Eurovision concept should work as both a still image and a moving shot.","parent":"euro"},{"id":"f21","cat":"euro","text":"Stage visuals are designed around the song instead of being decoration.","parent":"euro"},{"id":"f22","cat":"blender","text":"Current Blender work uses Blender 5.x.","parent":"blender"},{"id":"f23","cat":"blender","text":"Eevee Next is the main render engine.","parent":"blender"},{"id":"f24","cat":"blender","text":"Materials are built with node-based workflows.","parent":"blender"},{"id":"f25","cat":"blender","text":"Volumetrics are used for atmospheric beams and depth.","parent":"blender"},{"id":"f26","cat":"blender","text":"Lighting needs to feel cinematic rather than like random bright bulbs.","parent":"blender"},{"id":"f27","cat":"blender","text":"Spotlights have been tuned specifically to avoid the 'Christmas lights' look.","parent":"blender"},{"id":"f28","cat":"blender","text":"Geometry Nodes are part of the procedural toolkit.","parent":"blender"},{"id":"f29","cat":"blender","text":"Camera animation is scripted instead of being entirely manual.","parent":"blender"},{"id":"f30","cat":"blender","text":"Precise frame ranges are used to control reveals and transitions.","parent":"blender"},{"id":"f31","cat":"blender","text":"Heavy Blender scenes can reach very large project-file sizes.","parent":"blender"},{"id":"f32","cat":"blender","text":"A stage replica is being built from reference images and measurements.","parent":"blender"},{"id":"f33","cat":"stage","text":"The main stage object has been measured at roughly 32 m by 60 m by 2 m.","parent":"stage"},{"id":"f34","cat":"stage","text":"A fractured cone concept uses a 6 m bottom radius.","parent":"stage"},{"id":"f35","cat":"stage","text":"The same cone concept expands to a 12 m top radius.","parent":"stage"},{"id":"f36","cat":"stage","text":"The cone spans 18 m vertically from stage level to its top.","parent":"stage"},{"id":"f37","cat":"stage","text":"The cone concept uses 1 m thickness.","parent":"stage"},{"id":"f38","cat":"stage","text":"The fractured look aims for 100+ separate pieces.","parent":"stage"},{"id":"f39","cat":"stage","text":"A circular stage section has a radius around 5.887 m.","parent":"stage"},{"id":"f40","cat":"stage","text":"Catwalks are designed around roughly 14.584 m length.","parent":"stage"},{"id":"f41","cat":"stage","text":"Those catwalks are roughly 3.6 m wide.","parent":"stage"},{"id":"f42","cat":"stage","text":"LED walls are treated as pixel-like grids with discrete color behavior.","parent":"stage"},{"id":"f43","cat":"stage","text":"Fog is part of the stage language, not just a rendering trick.","parent":"stage"},{"id":"f44","cat":"stage","text":"Light beams are choreographed as visible shapes in space.","parent":"stage"},{"id":"f45","cat":"stage","text":"Props are designed to work with camera movement and performer blocking.","parent":"stage"},{"id":"f46","cat":"stage","text":"The camera should sometimes reveal the stage from behind-the-scenes spaces.","parent":"stage"},{"id":"f47","cat":"stage","text":"A greenroom opening can be used as a transition into the performance world.","parent":"stage"},{"id":"f48","cat":"stage","text":"Backstage corridors and stairs can become cinematic camera routes.","parent":"stage"},{"id":"f49","cat":"stage","text":"The goal is to make the virtual stage feel physically navigable.","parent":"stage"},{"id":"f50","cat":"dancer","text":"A slim low-poly dancer is being built as a reusable character.","parent":"dancer"},{"id":"f51","cat":"dancer","text":"The outfit uses a neon-turquoise electric-worker-inspired shirt.","parent":"dancer"},{"id":"f52","cat":"dancer","text":"A net layer is visible through the shirt's V-neck.","parent":"dancer"},{"id":"f53","cat":"dancer","text":"Black baggy leather-style trousers complete the silhouette.","parent":"dancer"},{"id":"f54","cat":"dancer","text":"The shirt is meant to read as silky rather than metallic.","parent":"dancer"},{"id":"f55","cat":"dancer","text":"The character rig favors simple FK bones over an overcomplicated rig.","parent":"dancer"},{"id":"f56","cat":"dancer","text":"No weight painting is needed for the rigid character construction.","parent":"dancer"},{"id":"f57","cat":"dancer","text":"Hands and palms can be merged when separate bones add no useful control.","parent":"dancer"},{"id":"f58","cat":"dancer","text":"Control empties are preferred over constantly entering Pose Mode.","parent":"dancer"},{"id":"f59","cat":"dancer","text":"Rigid bone parenting keeps the early animation system predictable.","parent":"dancer"},{"id":"f60","cat":"dancer","text":"Feet are treated as part of the shin chain in the simplified rig.","parent":"dancer"},{"id":"f61","cat":"dancer","text":"A LEG_BEND control drives the crouched leg pose.","parent":"dancer"},{"id":"f62","cat":"dancer","text":"The dancer needs to climb stairs with alternating lead legs.","parent":"dancer"},{"id":"f63","cat":"dancer","text":"Animation scripts should only modify the requested frame range.","parent":"dancer"},{"id":"f64","cat":"dancer","text":"Character names are used to keep rigs and animation scripts aligned.","parent":"dancer"},{"id":"f65","cat":"tech","text":"The current phone setup includes a Nothing Phone 3.","parent":"tech"},{"id":"f66","cat":"tech","text":"The phone configuration being used is 256 GB.","parent":"tech"},{"id":"f67","cat":"tech","text":"Nothing OS / Pixel-like UI design is especially appealing.","parent":"tech"},{"id":"f68","cat":"tech","text":"Mac hardware is used for 3D, music and development work.","parent":"tech"},{"id":"f69","cat":"tech","text":"The main Mac is a MacBook Air with an M4 chip and 16 GB RAM.","parent":"tech"},{"id":"f70","cat":"tech","text":"A Galaxy Tab S6 Lite is used in the school workflow.","parent":"tech"},{"id":"f71","cat":"tech","text":"VR is useful for turning a room into a navigable digital space.","parent":"tech"},{"id":"f72","cat":"tech","text":"Meta Quest 3 is part of the VR toolkit.","parent":"tech"},{"id":"f73","cat":"tech","text":"Different devices are evaluated by how well they fit the workflow.","parent":"tech"},{"id":"f74","cat":"tech","text":"Operating-system design is a real part of the hardware preference.","parent":"tech"},{"id":"f75","cat":"vr","text":"Room scanning is a way to bring physical spaces into digital projects.","parent":"vr"},{"id":"f76","cat":"vr","text":"The idea is to turn real rooms into spatial interfaces.","parent":"vr"},{"id":"f77","cat":"vr","text":"VR can connect architecture, stage design and interactive exploration.","parent":"vr"},{"id":"f78","cat":"vr","text":"Spatial projects benefit from the same precision used in Blender scenes.","parent":"vr"},{"id":"f79","cat":"creative","text":"Knitting is one of the hands-on creative hobbies.","parent":"creative"},{"id":"f80","cat":"creative","text":"Cooking is another way to experiment with making things from scratch.","parent":"creative"},{"id":"f81","cat":"creative","text":"A 3D pen is useful for fast physical prototyping.","parent":"creative"},{"id":"f82","cat":"creative","text":"Physical making and digital making often feed the same design instincts.","parent":"creative"},{"id":"f83","cat":"creative","text":"The recurring pattern is building things, testing them and refining them.","parent":"creative"},{"id":"f84","cat":"creative","text":"Visual construction is approached as a system of parts that need to fit.","parent":"creative"},{"id":"f85","cat":"future","text":"London is a long-term destination for studying music.","parent":"future"},{"id":"f86","cat":"future","text":"Music education and practical creative work are meant to reinforce each other.","parent":"future"},{"id":"f87","cat":"future","text":"Law is also interesting, especially consumer-protection topics.","parent":"future"},{"id":"f88","cat":"future","text":"Learning tends to happen through projects instead of isolated theory.","parent":"future"},{"id":"f89","cat":"future","text":"Software skills are developed by actually building working tools.","parent":"future"},{"id":"f90","cat":"future","text":"Problem solving often means iterating until the result behaves correctly.","parent":"future"},{"id":"f91","cat":"future","text":"Long-term plans combine creative work with technical independence.","parent":"future"},{"id":"f92","cat":"cipher","text":"The Cipher Lab runs encryption locally in the browser.","parent":"cipher"},{"id":"f93","cat":"cipher","text":"AES-256-GCM is used for authenticated encryption.","parent":"cipher"},{"id":"f94","cat":"cipher","text":"PBKDF2-HMAC-SHA-256 is used for passphrase-based key derivation.","parent":"cipher"},{"id":"f95","cat":"cipher","text":"Random salts help derive independent encryption keys.","parent":"cipher"},{"id":"f96","cat":"cipher","text":"Random nonces are generated for encrypted messages.","parent":"cipher"},{"id":"f97","cat":"cipher","text":"Base64 and hexadecimal are useful ciphertext display formats.","parent":"cipher"},{"id":"f98","cat":"cipher","text":"Tamper detection is part of the encryption design.","parent":"cipher"},{"id":"f99","cat":"cipher","text":"Unicode round-trip tests help validate real-world text handling.","parent":"cipher"},{"id":"f100","cat":"cipher","text":"The project is deployed as a static web experience.","parent":"cipher"},{"id":"f101","cat":"cipher","text":"The UI itself is designed as part of the experiment.","parent":"cipher"},{"id":"f102","cat":"cipher","text":"Web building includes debugging deployments, not just writing HTML.","parent":"cipher"},{"id":"f103","cat":"cipher","text":"Search, interaction and visual feedback are treated as first-class features.","parent":"cipher"},{"id":"x0","cat":"music","text":"Writing often develops from a phrase or lyric before the larger production is decided.","parent":"music"},{"id":"x1","cat":"music","text":"Songs are connected to visual storytelling rather than treated as audio-only objects.","parent":"music"},{"id":"x2","cat":"music","text":"The creative workflow moves repeatedly between writing, production, visuals and performance.","parent":"music"},{"id":"x3","cat":"euro","text":"Eurovision staging is studied as a complete production system: light, camera, graphics, props and movement.","parent":"eurovision"},{"id":"x4","cat":"euro","text":"The stage is often imagined from the audience, performer, backstage and production-control viewpoints.","parent":"eurovision"},{"id":"x5","cat":"euro","text":"Postcards can be designed as camera journeys through otherwise hidden parts of a venue.","parent":"eurovision"},{"id":"x6","cat":"euro","text":"A Eurovision concept can start with a physical object and expand into a whole visual world.","parent":"eurovision"},{"id":"x7","cat":"blender","text":"Lighting tests often compare emission, transparency, volumetrics and beam visibility.","parent":"blender"},{"id":"x8","cat":"blender","text":"Procedural systems are preferred when repeating hundreds of pieces would be slow to build manually.","parent":"blender"},{"id":"x9","cat":"blender","text":"Camera scripting is used to reproduce exact reveals and repeated movement patterns.","parent":"blender"},{"id":"x10","cat":"blender","text":"The same project can combine rigid character animation with procedural environmental animation.","parent":"blender"},{"id":"x11","cat":"blender","text":"Large scenes are broken down mentally into stage, character, lighting, camera and atmosphere systems.","parent":"blender"},{"id":"x12","cat":"stage","text":"The stage experiments include large circular platforms and long catwalk structures.","parent":"stage"},{"id":"x13","cat":"stage","text":"The virtual environment uses giant architectural forms to create scale around performers.","parent":"stage"},{"id":"x14","cat":"stage","text":"LED surfaces are imagined as grids of individually controlled pixels rather than one flat color.","parent":"stage"},{"id":"x15","cat":"stage","text":"Fog is used to make beams, depth and negative space visible to the camera.","parent":"stage"},{"id":"x16","cat":"stage","text":"Camera blocking is planned so performers and props stay readable instead of accidentally obscuring each other.","parent":"stage"},{"id":"x17","cat":"stage","text":"Backstage doors, stairs and greenroom openings can become deliberate cinematic transitions.","parent":"stage"},{"id":"x18","cat":"stage","text":"A stage reveal can begin in an ordinary production space and end inside a huge performance environment.","parent":"stage"},{"id":"x19","cat":"dancer","text":"The simplified dancer rig is intentionally easy to script and repair.","parent":"dancer"},{"id":"x20","cat":"dancer","text":"Control empties make common body adjustments accessible without entering Pose Mode.","parent":"dancer"},{"id":"x21","cat":"dancer","text":"The walking system alternates the leading leg while preserving the requested timeline.","parent":"dancer"},{"id":"x22","cat":"dancer","text":"Stair animation is based on exact tread depth and riser height rather than an approximate staircase.","parent":"dancer"},{"id":"x23","cat":"dancer","text":"Character objects are named so animation scripts can target the correct dancer reliably.","parent":"dancer"},{"id":"x24","cat":"dancer","text":"The rig is designed around a minimal number of useful bones instead of many tiny controls.","parent":"dancer"},{"id":"x25","cat":"vr","text":"A scanned room can become a reference for spatial design inside Blender or VR.","parent":"vr"},{"id":"x26","cat":"vr","text":"Spatial interfaces are interesting because they turn a flat screen problem into a physical navigation problem.","parent":"vr"},{"id":"x27","cat":"creative","text":"Hands-on hobbies provide a different kind of prototyping than software work.","parent":"creative"},{"id":"x28","cat":"creative","text":"Building things physically reinforces the same fit-and-refine mindset used in 3D projects.","parent":"creative"},{"id":"x29","cat":"future","text":"A long-term goal is to combine formal music study with a growing technical production skillset.","parent":"future"},{"id":"x30","cat":"future","text":"Project work is used as a way to test whether a new technical idea is actually useful.","parent":"future"},{"id":"x31","cat":"cipher","text":"The encryption interface emphasizes generating a passphrase, encrypting locally and inspecting the resulting ciphertext.","parent":"cipher"},{"id":"x32","cat":"cipher","text":"Authenticated encryption means the system can detect modified ciphertext instead of silently accepting it.","parent":"cipher"},{"id":"x33","cat":"cipher","text":"The project has been iterated through actual browser deployment failures and fixes.","parent":"cipher"},{"id":"x34","cat":"cipher","text":"The same site has also become a sandbox for interactive visualization experiments.","parent":"cipher"},{"id":"x35","cat":"stage","text":"A 12 m ceiling radius is part of the current large-scale stage experiment.","parent":"stage"},{"id":"x36","cat":"stage","text":"The ceiling experiment starts its controller points around a 6 m circle at z=2.","parent":"stage"},{"id":"x37","cat":"stage","text":"The upper controller points expand to a 12 m circle around z=24.","parent":"stage"},{"id":"x38","cat":"stage","text":"The ceiling is intended to remain a single continuous surface instead of many disconnected panels.","parent":"stage"},{"id":"x39","cat":"stage","text":"The ceiling system is meant to react to music and to conflict between independent controllers.","parent":"stage"},{"id":"x40","cat":"stage","text":"The marionette controllers are imagined with different personalities and competing control over the ceiling.","parent":"stage"},{"id":"x41","cat":"stage","text":"A fishing-rod-style cable can sag at short lengths, curve through an intermediate range and straighten when fully extended.","parent":"stage"},{"id":"x42","cat":"stage","text":"The current animation experiments deliberately use hard frame limits so tests stay manageable.","parent":"stage"},{"id":"x43","cat":"stage","text":"A current audio-reactive experiment is limited to the first 2500 animation frames.","parent":"stage"},{"id":"x44","cat":"stage","text":"Large virtual structures are designed with real dimensions so cameras and characters have believable scale.","parent":"stage"},{"id":"x45","cat":"dancer","text":"LEG_BEND is designed as a single high-level control for a predictable crouch pose.","parent":"dancer"},{"id":"x46","cat":"dancer","text":"The standing state keeps LEG_BEND at zero and the bent state offsets thigh and shin rotations together.","parent":"dancer"},{"id":"x47","cat":"dancer","text":"Rigid parenting is useful for low-poly characters where deforming meshes are intentionally avoided.","parent":"dancer"},{"id":"x48","cat":"dancer","text":"The character workflow favors merging unimportant hand and palm pieces when separate controls add clutter.","parent":"dancer"},{"id":"x49","cat":"blender","text":"Blender scripts are repeatedly rebuilt from known-working versions when a project gets too tangled.","parent":"blender"},{"id":"x50","cat":"blender","text":"Dimensions, coordinates and frame ranges are treated as part of the design specification, not incidental notes.","parent":"blender"},{"id":"x51","cat":"creative","text":"The recurring creative pattern is: prototype quickly, inspect the result, identify the mismatch and revise precisely.","parent":"creative"},{"id":"x52","cat":"web","text":"Web interfaces are being used as visual tools, not just static pages.","parent":"web"},{"id":"x53","cat":"web","text":"Deployment itself is part of the development loop: build, publish, inspect, fix and publish again.","parent":"web"}];
 
-const nodes=[
-{id:'music',cat:'music',title:'Music',text:'Songwriting, producing music and treating music as a serious long-term creative practice.',links:['eurovision','creative','future']},
-{id:'eurovision',cat:'euro',title:'Eurovision',text:'A recurring source of inspiration: songs, artists, stagecraft, visual identities, archives and performance ideas.',links:['music','blender','creative']},
-{id:'blender',cat:'blender',title:'Blender',text:'Hands-on 3D work across Eevee Next, materials, lighting, volumetrics, geometry nodes, animation and cameras.',links:['eurovision','stage','dancer','tech']},
-{id:'stage',cat:'blender',title:'Stage design',text:'Detailed digital stage worlds with LEDs, fog, light beams, props, camera choreography and large environments.',links:['blender','eurovision','creative']},
-{id:'dancer',cat:'blender',title:'Character animation',text:'Low-poly character work, rigging, rigid parenting, control empties, stair movement and procedural animation.',links:['blender','creative']},
-{id:'tech',cat:'tech',title:'Technology',text:'Strong interest in devices, operating systems, Macs, tablets, VR and making different technologies work together.',links:['blender','cipher','vr']},
-{id:'vr',cat:'tech',title:'VR / spatial',text:'Interest in room scanning, spatial interfaces and turning physical spaces into digital environments.',links:['tech','blender','creative']},
-{id:'creative',cat:'creative',title:'Making things',text:'Hands-on experimentation with physical and digital making: knitting, cooking, 3D tools and visual construction.',links:['music','blender','tech']},
-{id:'future',cat:'future',title:'Learning & growth',text:'A broad habit of learning through projects: music, 3D, software, coding, cryptography and practical problem solving.',links:['music','tech','blender','cipher']},
-{id:'cipher',cat:'cipher',title:'Cipher Lab',text:'A real browser encryption project combining interface design, cryptography and local-first web development.',links:['crypto','tech','creative']},
-{id:'crypto',cat:'cipher',title:'Cryptography',text:'Practical interest in AES-GCM, PBKDF2, salts, nonces, authentication and ciphertext formats.',links:['cipher','future','tech']},
-{id:'web',cat:'cipher',title:'Web building',text:'Iterating on deployed web experiences, debugging workflows and turning experiments into usable interactive tools.',links:['cipher','tech']},
-{id:'detail',cat:'creative',title:'Precision',text:'A strong pattern across projects: precise dimensions, coordinates, frame ranges, references and iterative technical fixes.',links:['blender','stage','creative']}
-];
+const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d'),lineCanvas=document.getElementById('lines'),lctx=lineCanvas.getContext('2d');
+const labels=document.getElementById('labels');
+const factEls=new Map(),nodeEls=new Map(),clusterPos={};
+let yaw=.12,pitch=.04,zoom=1,drag=false,lastX=0,lastY=0,searchTerm='';
 
-const positions={
-music:new THREE.Vector3(-6.5,3.4,.3),
-eurovision:new THREE.Vector3(6.3,3.8,-.5),
-blender:new THREE.Vector3(-6.5,-3.1,.6),
-tech:new THREE.Vector3(6.4,-2.6,.8),
-creative:new THREE.Vector3(.2,-6,-1.4),
-future:new THREE.Vector3(.2,5.9,-2.2),
-cipher:new THREE.Vector3(7,.5,4.7)
+function project(p){
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  let x=p.x*cy-p.z*sy, z=p.x*sy+p.z*cy;
+  let y=p.y*cp-z*sp; z=p.y*sp+z*cp;
+  const depth=14*zoom;
+  const scale=depth/(depth+z+8);
+  return {x:innerWidth/2+x*scale*72,y:innerHeight/2-y*scale*72,z,scale};
+}
+function point(x,y,z){return{x,y,z}}
+
+const clusterCenters={
+ music:point(-6,4,0),eurovision:point(6,4,-.7),blender:point(-6,-3,.4),tech:point(6,-3,1),creative:point(0,-6,-1),future:point(0,6,-2),cipher:point(7,.4,4.3),
+ stage:point(-7,-4.7,1.5),dancer:point(-4.2,-1.6,2.2),vr:point(4.5,-4.2,2.6),crypto:point(5.8,1.8,3.1),web:point(4.7,-.8,2.8),detail:point(1.8,-5,0.8)
 };
-positions.stage=positions.blender.clone().add(new THREE.Vector3(-.1,-2.2,1.2));
-positions.dancer=positions.blender.clone().add(new THREE.Vector3(1.8,1.4,1.5));
-positions.vr=positions.tech.clone().add(new THREE.Vector3(-1.4,-1.2,1.7));
-positions.crypto=positions.cipher.clone().add(new THREE.Vector3(-1.2,1.3,-1.2));
-positions.web=positions.cipher.clone().add(new THREE.Vector3(-1.8,-1.2,-1.0));
-positions.detail=positions.creative.clone().add(new THREE.Vector3(1.7,1.5,1));
+const positions={...clusterCenters};
 
-const graph=new THREE.Group();scene.add(graph);
-const hitTargets=[];const cloudMap=new Map();const labelMap=new Map();
-const labelsEl=document.getElementById('labels');
-function createLabel(n){
-  const el=document.createElement('div');
-  el.className='nodeLabel';
-  el.innerHTML='<div class="name"></div><div class="cat"></div><div class="desc"></div><div class="linksLine"></div>';
-  el.querySelector('.name').textContent=n.title;
-  el.querySelector('.cat').textContent=cats[n.cat].label;
-  el.querySelector('.desc').textContent=n.text;
-  el.querySelector('.linksLine').textContent='CONNECTED · '+n.links.map(id=>nodes.find(x=>x.id===id)?.title).filter(Boolean).join(' · ');
-  el.querySelector('.cat').style.color='#'+new THREE.Color(cats[n.cat].color).getHexString();
-  labelsEl.appendChild(el);
-  labelMap.set(n.id,el);
-}
+// Distribute each specific text in a real 3D cloud around its parent.
+facts.forEach((f,i)=>{
+  const parent=positions[f.parent]||positions.creative;
+  const a=i*2.3999632297+(f.parent.length*.31);
+  const b=((i*1.618)%Math.PI)-Math.PI/2;
+  const r=2.2+(i%7)*.48;
+  const x=parent.x+Math.cos(a)*r;
+  const y=parent.y+Math.sin(b)*r*.82;
+  const z=parent.z+Math.sin(a)*r;
+  f.pos=point(x,y,z);
+});
 
-function makeBrain(){
-  const g=new THREE.Group(),pts=[],cols=[];
-  for(let i=0;i<3600;i++){
-    const side=Math.random()<.5?-1:1;
-    const x=side*(.15+Math.random()*2.25);
-    const y=(Math.random()*2-1)*1.6;
-    const z=(Math.random()*2-1)*1.75;
-    const fold=Math.sin(y*6+z*3)*.14+Math.sin(z*8-y*2)*.08;
-    const ell=x*x/5.2+y*y/3+z*z/3.55;
-    if(ell>1.02+fold)continue;
-    pts.push(x,y,z);
-    cols.push(.26+Math.random()*.24,.31+Math.random()*.26,.42+Math.random()*.32);
+function brainPoints(){
+  const pts=[];
+  for(let i=0;i<1900;i++){
+    const hemi=Math.random()<.5?-1:1;
+    let x=hemi*(.25+Math.random()*2.25),y=(Math.random()*2-1)*1.75,z=(Math.random()*2-1)*1.95;
+    const fold=Math.sin(y*7+z*3)*.16+Math.sin(z*9-y*3)*.11;
+    if(x*x/5.2+y*y/3.1+z*z/3.8<1.02+fold)pts.push(point(x,y,z));
   }
-  const geom=new THREE.BufferGeometry();
-  geom.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
-  geom.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
-  g.add(new THREE.Points(geom,new THREE.PointsMaterial({size:.05,vertexColors:true,transparent:true,opacity:.82})));
-  const wire=new THREE.MeshBasicMaterial({color:0x7d879a,wireframe:true,transparent:true,opacity:.055});
-  for(const x of [-1.02,1.02]){
-    const geo=new THREE.SphereGeometry(1,28,20);geo.scale(2.35,1.65,1.78);
-    const m=new THREE.Mesh(geo,wire);m.position.x=x;g.add(m);
-  }
-  const cpts=[];
-  for(let i=0;i<700;i++){const a=Math.random()*Math.PI*2,r=Math.pow(Math.random(),.55)*1.8;cpts.push((Math.random()-.5)*.28,Math.sin(a)*r*.82,Math.cos(a)*r*.7)}
-  const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.Float32BufferAttribute(cpts,3));
-  g.add(new THREE.Points(cg,new THREE.PointsMaterial({color:0xff8a2b,size:.035,transparent:true,opacity:.42})));
-  return g;
+  return pts;
 }
-const brain=makeBrain();graph.add(brain);
+const brain=brainPoints();
 
-function cloud(n){
-  const g=new THREE.Group(),c=new THREE.Color(cats[n.cat].color);
-  const core=new THREE.Mesh(new THREE.SphereGeometry(.3,20,20),new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:1.2,roughness:.35}));
-  core.userData.node=n;hitTargets.push(core);g.add(core);
-  g.add(new THREE.Mesh(new THREE.SphereGeometry(.58,20,20),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.045})));
-  for(let i=0;i<34;i++){
-    const p=new THREE.Mesh(new THREE.SphereGeometry(.02+Math.random()*.045,7,7),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.22+Math.random()*.42}));
-    const a=Math.random()*Math.PI*2,r=.45+Math.random()*.9;p.position.set(Math.cos(a)*r,(Math.random()-.5)*.8,Math.sin(a)*r);g.add(p);
-  }
-  g.position.copy(positions[n.id]||new THREE.Vector3());
-  g.userData.base=g.position.clone();
-  graph.add(g);cloudMap.set(n.id,g);createLabel(n);
+function setupLegend(){
+  const counts={};facts.forEach(f=>counts[f.cat]=(counts[f.cat]||0)+1);
+  const el=document.getElementById('legendRows');
+  Object.entries(cats).forEach(([k,v])=>{
+    const row=document.createElement('div');row.className='legendRow';row.innerHTML='<span class="dot"></span>'+v.label+' <span style="margin-left:auto;color:#687486;font-size:8px">'+(counts[k]||0)+'</span>';row.querySelector('.dot').style.background=v.color;el.appendChild(row);
+  });
 }
-nodes.forEach(cloud);
-
-const facts=[
-{id:'f0',cat:'music',text:"Songwriting starts from lyrics, ideas and emotional phrasing.",parent:'music'},
-{id:'f1',cat:'music',text:"Five professionally produced songs have been made in Hebrew.",parent:'music'},
-{id:'f2',cat:'music',text:"Music is treated as a long-term craft, not just a side hobby.",parent:'music'},
-{id:'f3',cat:'music',text:"Spotify and Apple Music are part of the release plan.",parent:'music'},
-{id:'f4',cat:'music',text:"Production decisions matter as much as the initial songwriting.",parent:'music'},
-{id:'f5',cat:'music',text:"Performance ideas often influence the writing itself.",parent:'music'},
-{id:'f6',cat:'music',text:"A song can trigger a whole visual concept, not just an audio track.",parent:'music'},
-{id:'f7',cat:'music',text:"Stage movement and camera language are considered alongside music.",parent:'music'},
-{id:'f8',cat:'music',text:"Eurovision is a major source of songwriting and production inspiration.",parent:'music'},
-{id:'f9',cat:'music',text:"The goal is to turn rough ideas into finished, release-ready work.",parent:'music'},
-{id:'f10',cat:'euro',text:"Eurovision is studied through songs, staging, graphics and production.",parent:'euro'},
-{id:'f11',cat:'euro',text:"Stage design is interesting as much as the songs themselves.",parent:'euro'},
-{id:'f12',cat:'euro',text:"2025 Basel visuals use a highly recognizable heart-based identity.",parent:'euro'},
-{id:'f13',cat:'euro',text:"Florian Wieder's stage design is a recurring visual reference point.",parent:'euro'},
-{id:'f14',cat:'euro',text:"Eurovision archives are used as a source of ideas and comparisons.",parent:'euro'},
-{id:'f15',cat:'euro',text:"The 'Hall of Fame' concept turns Eurovision history into a physical experience.",parent:'euro'},
-{id:'f16',cat:'euro',text:"Visual identity, typography and stage architecture are all connected.",parent:'euro'},
-{id:'f17',cat:'euro',text:"Postcard and backstage camera ideas are treated like miniature films.",parent:'euro'},
-{id:'f18',cat:'euro',text:"Audience POVs, performer POVs and production POVs all matter.",parent:'euro'},
-{id:'f19',cat:'euro',text:"Greenroom spaces can become part of the storytelling.",parent:'euro'},
-{id:'f20',cat:'euro',text:"A good Eurovision concept should work as both a still image and a moving shot.",parent:'euro'},
-{id:'f21',cat:'euro',text:"Stage visuals are designed around the song instead of being decoration.",parent:'euro'},
-{id:'f22',cat:'blender',text:"Current Blender work uses Blender 5.x.",parent:'blender'},
-{id:'f23',cat:'blender',text:"Eevee Next is the main render engine.",parent:'blender'},
-{id:'f24',cat:'blender',text:"Materials are built with node-based workflows.",parent:'blender'},
-{id:'f25',cat:'blender',text:"Volumetrics are used for atmospheric beams and depth.",parent:'blender'},
-{id:'f26',cat:'blender',text:"Lighting needs to feel cinematic rather than like random bright bulbs.",parent:'blender'},
-{id:'f27',cat:'blender',text:"Spotlights have been tuned specifically to avoid the 'Christmas lights' look.",parent:'blender'},
-{id:'f28',cat:'blender',text:"Geometry Nodes are part of the procedural toolkit.",parent:'blender'},
-{id:'f29',cat:'blender',text:"Camera animation is scripted instead of being entirely manual.",parent:'blender'},
-{id:'f30',cat:'blender',text:"Precise frame ranges are used to control reveals and transitions.",parent:'blender'},
-{id:'f31',cat:'blender',text:"Heavy Blender scenes can reach very large project-file sizes.",parent:'blender'},
-{id:'f32',cat:'blender',text:"A stage replica is being built from reference images and measurements.",parent:'blender'},
-{id:'f33',cat:'stage',text:"The main stage object has been measured at roughly 32 m by 60 m by 2 m.",parent:'stage'},
-{id:'f34',cat:'stage',text:"A fractured cone concept uses a 6 m bottom radius.",parent:'stage'},
-{id:'f35',cat:'stage',text:"The same cone concept expands to a 12 m top radius.",parent:'stage'},
-{id:'f36',cat:'stage',text:"The cone spans 18 m vertically from stage level to its top.",parent:'stage'},
-{id:'f37',cat:'stage',text:"The cone concept uses 1 m thickness.",parent:'stage'},
-{id:'f38',cat:'stage',text:"The fractured look aims for 100+ separate pieces.",parent:'stage'},
-{id:'f39',cat:'stage',text:"A circular stage section has a radius around 5.887 m.",parent:'stage'},
-{id:'f40',cat:'stage',text:"Catwalks are designed around roughly 14.584 m length.",parent:'stage'},
-{id:'f41',cat:'stage',text:"Those catwalks are roughly 3.6 m wide.",parent:'stage'},
-{id:'f42',cat:'stage',text:"LED walls are treated as pixel-like grids with discrete color behavior.",parent:'stage'},
-{id:'f43',cat:'stage',text:"Fog is part of the stage language, not just a rendering trick.",parent:'stage'},
-{id:'f44',cat:'stage',text:"Light beams are choreographed as visible shapes in space.",parent:'stage'},
-{id:'f45',cat:'stage',text:"Props are designed to work with camera movement and performer blocking.",parent:'stage'},
-{id:'f46',cat:'stage',text:"The camera should sometimes reveal the stage from behind-the-scenes spaces.",parent:'stage'},
-{id:'f47',cat:'stage',text:"A greenroom opening can be used as a transition into the performance world.",parent:'stage'},
-{id:'f48',cat:'stage',text:"Backstage corridors and stairs can become cinematic camera routes.",parent:'stage'},
-{id:'f49',cat:'stage',text:"The goal is to make the virtual stage feel physically navigable.",parent:'stage'},
-{id:'f50',cat:'dancer',text:"A slim low-poly dancer is being built as a reusable character.",parent:'dancer'},
-{id:'f51',cat:'dancer',text:"The outfit uses a neon-turquoise electric-worker-inspired shirt.",parent:'dancer'},
-{id:'f52',cat:'dancer',text:"A net layer is visible through the shirt's V-neck.",parent:'dancer'},
-{id:'f53',cat:'dancer',text:"Black baggy leather-style trousers complete the silhouette.",parent:'dancer'},
-{id:'f54',cat:'dancer',text:"The shirt is meant to read as silky rather than metallic.",parent:'dancer'},
-{id:'f55',cat:'dancer',text:"The character rig favors simple FK bones over an overcomplicated rig.",parent:'dancer'},
-{id:'f56',cat:'dancer',text:"No weight painting is needed for the rigid character construction.",parent:'dancer'},
-{id:'f57',cat:'dancer',text:"Hands and palms can be merged when separate bones add no useful control.",parent:'dancer'},
-{id:'f58',cat:'dancer',text:"Control empties are preferred over constantly entering Pose Mode.",parent:'dancer'},
-{id:'f59',cat:'dancer',text:"Rigid bone parenting keeps the early animation system predictable.",parent:'dancer'},
-{id:'f60',cat:'dancer',text:"Feet are treated as part of the shin chain in the simplified rig.",parent:'dancer'},
-{id:'f61',cat:'dancer',text:"A LEG_BEND control drives the crouched leg pose.",parent:'dancer'},
-{id:'f62',cat:'dancer',text:"The dancer needs to climb stairs with alternating lead legs.",parent:'dancer'},
-{id:'f63',cat:'dancer',text:"Animation scripts should only modify the requested frame range.",parent:'dancer'},
-{id:'f64',cat:'dancer',text:"Character names are used to keep rigs and animation scripts aligned.",parent:'dancer'},
-{id:'f65',cat:'tech',text:"The current phone setup includes a Nothing Phone 3.",parent:'tech'},
-{id:'f66',cat:'tech',text:"The phone configuration being used is 256 GB.",parent:'tech'},
-{id:'f67',cat:'tech',text:"Nothing OS / Pixel-like UI design is especially appealing.",parent:'tech'},
-{id:'f68',cat:'tech',text:"Mac hardware is used for 3D, music and development work.",parent:'tech'},
-{id:'f69',cat:'tech',text:"The main Mac is a MacBook Air with an M4 chip and 16 GB RAM.",parent:'tech'},
-{id:'f70',cat:'tech',text:"A Galaxy Tab S6 Lite is used in the school workflow.",parent:'tech'},
-{id:'f71',cat:'tech',text:"VR is useful for turning a room into a navigable digital space.",parent:'tech'},
-{id:'f72',cat:'tech',text:"Meta Quest 3 is part of the VR toolkit.",parent:'tech'},
-{id:'f73',cat:'tech',text:"Different devices are evaluated by how well they fit the workflow.",parent:'tech'},
-{id:'f74',cat:'tech',text:"Operating-system design is a real part of the hardware preference.",parent:'tech'},
-{id:'f75',cat:'vr',text:"Room scanning is a way to bring physical spaces into digital projects.",parent:'vr'},
-{id:'f76',cat:'vr',text:"The idea is to turn real rooms into spatial interfaces.",parent:'vr'},
-{id:'f77',cat:'vr',text:"VR can connect architecture, stage design and interactive exploration.",parent:'vr'},
-{id:'f78',cat:'vr',text:"Spatial projects benefit from the same precision used in Blender scenes.",parent:'vr'},
-{id:'f79',cat:'creative',text:"Knitting is one of the hands-on creative hobbies.",parent:'creative'},
-{id:'f80',cat:'creative',text:"Cooking is another way to experiment with making things from scratch.",parent:'creative'},
-{id:'f81',cat:'creative',text:"A 3D pen is useful for fast physical prototyping.",parent:'creative'},
-{id:'f82',cat:'creative',text:"Physical making and digital making often feed the same design instincts.",parent:'creative'},
-{id:'f83',cat:'creative',text:"The recurring pattern is building things, testing them and refining them.",parent:'creative'},
-{id:'f84',cat:'creative',text:"Visual construction is approached as a system of parts that need to fit.",parent:'creative'},
-{id:'f85',cat:'future',text:"London is a long-term destination for studying music.",parent:'future'},
-{id:'f86',cat:'future',text:"Music education and practical creative work are meant to reinforce each other.",parent:'future'},
-{id:'f87',cat:'future',text:"Law is also interesting, especially consumer-protection topics.",parent:'future'},
-{id:'f88',cat:'future',text:"Learning tends to happen through projects instead of isolated theory.",parent:'future'},
-{id:'f89',cat:'future',text:"Software skills are developed by actually building working tools.",parent:'future'},
-{id:'f90',cat:'future',text:"Problem solving often means iterating until the result behaves correctly.",parent:'future'},
-{id:'f91',cat:'future',text:"Long-term plans combine creative work with technical independence.",parent:'future'},
-{id:'f92',cat:'cipher',text:"The Cipher Lab runs encryption locally in the browser.",parent:'cipher'},
-{id:'f93',cat:'cipher',text:"AES-256-GCM is used for authenticated encryption.",parent:'cipher'},
-{id:'f94',cat:'cipher',text:"PBKDF2-HMAC-SHA-256 is used for passphrase-based key derivation.",parent:'cipher'},
-{id:'f95',cat:'cipher',text:"Random salts help derive independent encryption keys.",parent:'cipher'},
-{id:'f96',cat:'cipher',text:"Random nonces are generated for encrypted messages.",parent:'cipher'},
-{id:'f97',cat:'cipher',text:"Base64 and hexadecimal are useful ciphertext display formats.",parent:'cipher'},
-{id:'f98',cat:'cipher',text:"Tamper detection is part of the encryption design.",parent:'cipher'},
-{id:'f99',cat:'cipher',text:"Unicode round-trip tests help validate real-world text handling.",parent:'cipher'},
-{id:'f100',cat:'cipher',text:"The project is deployed as a static web experience.",parent:'cipher'},
-{id:'f101',cat:'cipher',text:"The UI itself is designed as part of the experiment.",parent:'cipher'},
-{id:'f102',cat:'cipher',text:"Web building includes debugging deployments, not just writing HTML.",parent:'cipher'},
-{id:'f103',cat:'cipher',text:"Search, interaction and visual feedback are treated as first-class features.",parent:'cipher'}
-];
-
-const factMap=new Map(),factLabelMap=new Map();
-function createFact(f,i){
-  const parent=positions[f.parent]||new THREE.Vector3();
-  const theta=(i*2.39996)% (Math.PI*2);
-  const ring=2.6+(i%5)*.72;
-  const yJitter=((i%7)-3)*.32;
-  const p=parent.clone().add(new THREE.Vector3(Math.cos(theta)*ring,Math.sin(theta*1.7)*ring*.78+yJitter,Math.sin(theta)*ring));
-  const g=new THREE.Group();
-  g.position.copy(p);
-  g.userData.base=p.clone();
-  graph.add(g);
-  factMap.set(f.id,{group:g, parent:f.parent});
-
-  const label=document.createElement('div');
-  label.className='factLabel';
-  label.innerHTML='<span class="factDot"></span><span class="factText"></span>';
-  label.querySelector('.factText').textContent=f.text;
-  label.querySelector('.factDot').style.background='#'+new THREE.Color(cats[f.cat].color).getHexString();
-  label.addEventListener('click',ev=>{ev.stopPropagation();const n=nodes.find(x=>x.id===f.parent);if(n)select(n)});
-  labelsEl.appendChild(label);
-  factLabelMap.set(f.id,label);
-
-  const pp=parent.clone();
-  const curve=new THREE.CatmullRomCurve3([pp.clone().multiplyScalar(.97),p.clone().add(pp).multiplyScalar(.5),p]);
-  const geom=new THREE.BufferGeometry().setFromPoints(curve.getPoints(18));
-  graph.add(new THREE.Line(geom,new THREE.LineBasicMaterial({color:cats[f.cat].color,transparent:true,opacity:.055})));
+function makeLabels(){
+  nodes.forEach(n=>{
+    const el=document.createElement('div');el.className='clusterLabel';el.innerHTML='<strong></strong><div class="cat"></div><div class="count"></div>';
+    el.querySelector('strong').textContent=n.title;el.querySelector('.cat').textContent=cats[n.cat].label;el.querySelector('.cat').style.color=cats[n.cat].color;
+    el.querySelector('.count').textContent=(facts.filter(f=>f.parent===n.id).length)+' SPECIFIC DETAILS';
+    el.addEventListener('click',()=>selectNode(n));
+    labels.appendChild(el);nodeEls.set(n.id,el);
+  });
+  facts.forEach(f=>{
+    const el=document.createElement('div');el.className='factLabel';el.innerHTML='<div class="factTop"><span class="factDot"></span><span class="factText"></span></div><div class="factMeta"></div>';
+    el.querySelector('.factText').textContent=f.text;el.querySelector('.factDot').style.background=cats[f.cat].color;
+    el.querySelector('.factMeta').textContent=cats[f.cat].label;
+    el.addEventListener('click',()=>selectNode(nodes.find(n=>n.id===f.parent)));
+    labels.appendChild(el);factEls.set(f.id,el);
+  });
 }
-facts.forEach(createFact);
-
-function edge(a,b,opacity=.23){
-  const pa=positions[a],pb=positions[b];if(!pa||!pb)return;
-  const mid=pa.clone().add(pb).multiplyScalar(.5);mid.y+=Math.sin((pa.x+pb.z)*.55)*.65;
-  const curve=new THREE.CatmullRomCurve3([pa,mid,pb]);
-  const geom=new THREE.BufferGeometry().setFromPoints(curve.getPoints(32));
-  const cat=nodes.find(n=>n.id===a)?.cat||'cipher';
-  graph.add(new THREE.Line(geom,new THREE.LineBasicMaterial({color:cats[cat].color,transparent:true,opacity})));
+function resize(){
+  const d=Math.min(devicePixelRatio,2);
+  canvas.width=lineCanvas.width=Math.floor(innerWidth*d);canvas.height=lineCanvas.height=Math.floor(innerHeight*d);
+  canvas.style.width=lineCanvas.style.width=innerWidth+'px';canvas.style.height=lineCanvas.style.height=innerHeight+'px';
+  ctx.setTransform(d,0,0,d,0,0);lctx.setTransform(d,0,0,d,0,0);
 }
-const used=new Set();
-nodes.forEach(n=>n.links.forEach(id=>{const k=[n.id,id].sort().join('|');if(!used.has(k)){used.add(k);edge(n.id,id)}}));
-
-for(const n of nodes){
-  const p=positions[n.id];if(!p)continue;
-  const inward=p.clone().multiplyScalar(.61);inward.y*=.72;
-  const geom=new THREE.BufferGeometry().setFromPoints([inward,p]);
-  graph.add(new THREE.Line(geom,new THREE.LineBasicMaterial({color:cats[n.cat].color,transparent:true,opacity:.13})));
+function draw(){
+  ctx.clearRect(0,0,innerWidth,innerHeight);lctx.clearRect(0,0,innerWidth,innerHeight);
+  const bp=project(point(0,0,0));
+  // luminous brain field
+  const g=ctx.createRadialGradient(bp.x,bp.y,0,bp.x,bp.y,240);g.addColorStop(0,'rgba(255,138,43,.13)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(bp.x,bp.y,240,0,Math.PI*2);ctx.fill();
+  brain.forEach(p=>{
+    const q=project(p); if(q.z>25)return;
+    const size=Math.max(.55,1.6*q.scale);
+    ctx.fillStyle='rgba(160,173,195,.45)';ctx.fillRect(q.x-size/2,q.y-size/2,size,size);
+  });
+  // brain seam + subtle hemisphere outlines
+  ctx.strokeStyle='rgba(125,135,154,.12)';ctx.lineWidth=1;
+  [[-1,1],[1,1]].forEach(()=>{});
+  // connections between the brain and cluster cores
+  Object.entries(positions).forEach(([id,p])=>{
+    if(!nodes.some(n=>n.id===id)&&!facts.some(f=>f.parent===id))return;
+    const q=project(p);lctx.beginPath();lctx.moveTo(bp.x,bp.y);lctx.lineTo(q.x,q.y);lctx.strokeStyle='rgba(255,255,255,.065)';lctx.stroke();
+  });
+  nodes.forEach(n=>{
+    const p=project(positions[n.id]);if(p.z>18)return;
+    n.links.forEach(id=>{if(n.id>id)return;const target=positions[id];if(!target)return;const q=project(target);lctx.beginPath();lctx.moveTo(p.x,p.y);lctx.lineTo(q.x,q.y);lctx.strokeStyle=cats[n.cat].color+'55';lctx.lineWidth=1;lctx.stroke();});
+    lctx.fillStyle=cats[n.cat].color;lctx.beginPath();lctx.arc(p.x,p.y,Math.max(2.5,5*p.scale),0,Math.PI*2);lctx.fill();
+  });
 }
-
-const stars=[];for(let i=0;i<1500;i++){const r=34+Math.random()*26,a=Math.random()*Math.PI*2,b=Math.acos(2*Math.random()-1);stars.push(r*Math.sin(b)*Math.cos(a),r*Math.sin(b)*Math.sin(a),r*Math.cos(b))}
-const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(stars,3));
-scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0x6b7586,size:.04,transparent:true,opacity:.5})));
-
-const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
-function select(n){
+function updateLabels(){
+  const query=searchTerm;
+  nodes.forEach(n=>{
+    const el=nodeEls.get(n.id),p=project(positions[n.id]);
+    const visible=!query||n.title.toLowerCase().includes(query)||cats[n.cat].label.toLowerCase().includes(query)||facts.some(f=>f.parent===n.id&&f.text.toLowerCase().includes(query));
+    const ok=visible&&p.z<18;
+    el.style.display=ok?'block':'none';if(ok){el.style.left=p.x+'px';el.style.top=(p.y-8)+'px';el.style.opacity=Math.max(.35,Math.min(1,1-p.z/25));}
+  });
+  facts.forEach(f=>{
+    const el=factEls.get(f.id),p=project(f.pos);
+    const visible=!query||f.text.toLowerCase().includes(query)||cats[f.cat].label.toLowerCase().includes(query);
+    const ok=visible&&p.z<20&&p.x>-220&&p.x<innerWidth+220&&p.y>-100&&p.y<innerHeight+100;
+    el.style.display=ok?'block':'none';
+    if(ok){const s=Math.max(.72,Math.min(1.25,p.scale));el.style.left=p.x+'px';el.style.top=p.y+'px';el.style.transform='translate(-50%,-50%) scale('+s+')';el.style.opacity=Math.max(.34,Math.min(1,1-p.z/28));}
+  });
+}
+function selectNode(n){
+  if(!n)return;
   document.getElementById('infoCat').textContent=cats[n.cat].label;
-  document.getElementById('infoCat').style.color='#'+new THREE.Color(cats[n.cat].color).getHexString();
+  document.getElementById('infoCat').style.color=cats[n.cat].color;
   document.getElementById('infoTitle').textContent=n.title;
-  document.getElementById('infoText').textContent=n.text;
+  const details=facts.filter(f=>f.parent===n.id).slice(0,5).map(f=>f.text).join(' · ');
+  document.getElementById('infoText').textContent=details||'A connected project cluster.';
   document.getElementById('links').textContent='CONNECTED TO · '+n.links.map(id=>nodes.find(x=>x.id===id)?.title).filter(Boolean).join(' · ');
   document.getElementById('info').classList.add('show');
-  cloudMap.forEach((g,id)=>{
-    const c=g.children[0], label=labelMap.get(id);
-    const selected=id===n.id;
-    c.scale.setScalar(selected?1.65:1);
-    c.material.emissiveIntensity=selected?3.0:1.2;
-    if(label) label.style.borderColor=selected?'rgba(255,138,43,.55)':'rgba(255,255,255,.13)';
-    if(label) label.style.boxShadow=selected?'0 0 30px rgba(255,138,43,.16),0 12px 34px rgba(0,0,0,.34)':'0 12px 34px rgba(0,0,0,.30)';
-  });
 }
-let pointerMoved=false,pointerStartX=0,pointerStartY=0;
-renderer.domElement.addEventListener('pointerdown',e=>{
-  pointerMoved=false;pointerStartX=e.clientX;pointerStartY=e.clientY;
-});
-renderer.domElement.addEventListener('pointermove',e=>{
-  if(Math.hypot(e.clientX-pointerStartX,e.clientY-pointerStartY)>5)pointerMoved=true;
-});
-renderer.domElement.addEventListener('click',e=>{
-  if(pointerMoved)return;
-  const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;
-  ray.setFromCamera(mouse,camera);const hits=ray.intersectObjects(hitTargets,false);
-  if(hits[0]?.object.userData.node)select(hits[0].object.userData.node);
-});
-
-document.getElementById('search').addEventListener('input',e=>{
-  const q=e.target.value.trim().toLowerCase();
-  nodes.forEach(n=>{
-    const hit=!q||n.title.toLowerCase().includes(q)||n.text.toLowerCase().includes(q)||cats[n.cat].label.toLowerCase().includes(q);
-    cloudMap.get(n.id).visible=hit;
-    const label=labelMap.get(n.id); if(label) label.style.display=hit?'block':'none';
-  });
-});
-
-const labelVec=new THREE.Vector3();
-function updateLabels(){
-  nodes.forEach(n=>{
-    const g=cloudMap.get(n.id),label=labelMap.get(n.id);
-    if(!g||!label||!g.visible){if(label)label.style.display='none';return;}
-    labelVec.copy(g.position).project(camera);
-    const x=(labelVec.x*.5+.5)*innerWidth;
-    const y=(-labelVec.y*.5+.5)*innerHeight;
-    const onScreen=labelVec.z>-1&&labelVec.z<1&&x>-120&&x<innerWidth+120&&y>-80&&y<innerHeight+80;
-    label.style.display=onScreen?'block':'none';
-    if(onScreen){label.style.left=x+'px';label.style.top=(y-72)+'px';}
-  });
-  facts.forEach((f,i)=>{
-    const item=factMap.get(f.id),label=factLabelMap.get(f.id);
-    if(!item||!label){return;}
-    labelVec.copy(item.group.position).project(camera);
-    const x=(labelVec.x*.5+.5)*innerWidth;
-    const y=(-labelVec.y*.5+.5)*innerHeight;
-    const q=document.getElementById('search').value.trim().toLowerCase();
-    const hit=!q||f.text.toLowerCase().includes(q)||cats[f.cat].label.toLowerCase().includes(q);
-    const onScreen=labelVec.z>-1&&labelVec.z<1&&x>-120&&x<innerWidth+120&&y>-80&&y<innerHeight+80;
-    label.style.display=hit&&onScreen?'block':'none';
-    if(hit&&onScreen){label.style.left=x+'px';label.style.top=y+'px';}
-  });
-}
-function focus(distance){controls.target.set(0,0,0);orbitDistance=distance;applyCamera()}
-document.getElementById('reset').onclick=()=>focus(16);
-document.getElementById('focus').onclick=()=>focus(5.4);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-
-if(!window.THREE){
-  document.getElementById('app').innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;background:#050608;color:#eef1f6;font:14px system-ui;padding:30px;text-align:center">Three.js could not load.<br><small style="color:#8993a3">Check the internet connection and refresh.</small></div>';
-  throw new Error('Three.js failed to load');
-}
-if(!renderer.capabilities?.isWebGL2 && !renderer.getContext()){
-  document.getElementById('app').innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;background:#050608;color:#eef1f6;font:14px system-ui;padding:30px;text-align:center">WebGL is unavailable in this browser.</div>';
-}
-let t=0;
-function animate(){requestAnimationFrame(animate);t+=.004;brain.rotation.y=Math.sin(t*.4)*.045;centralPulse();cloudMap.forEach((g,i)=>{g.position.y=g.userData.base.y+Math.sin(t*1.25+i*.63)*.07;g.rotation.y+=.0015});factMap.forEach((item,i)=>{const g=item.group;g.position.y=g.userData.base.y+Math.sin(t*.8+i*.37)*.11});controls.update();updateLabels();renderer.render(scene,camera)}
-function centralPulse(){const s=1+Math.sin(t*1.6)*.025;brain.scale.setScalar(s)}
-animate();
+document.getElementById('search').addEventListener('input',e=>{searchTerm=e.target.value.trim().toLowerCase();updateLabels()});
+document.getElementById('reset').onclick=()=>{yaw=.12;pitch=.04;zoom=1;};
+document.getElementById('focus').onclick=()=>{yaw=.12;pitch=.04;zoom=.56;};
+space.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;space.setPointerCapture?.(e.pointerId)});
+space.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;yaw-=dx*.006;pitch=Math.max(-1.15,Math.min(1.15,pitch+dy*.006))});
+space.addEventListener('pointerup',()=>drag=false);space.addEventListener('pointercancel',()=>drag=false);
+space.addEventListener('wheel',e=>{e.preventDefault();zoom*=Math.exp(e.deltaY*.0012);zoom=Math.max(.28,Math.min(2.4,zoom));},{passive:false});
+addEventListener('resize',resize);resize();setupLegend();makeLabels();
+function loop(){requestAnimationFrame(loop);draw();updateLabels()}loop();
 </script>
 </body>
 </html>
